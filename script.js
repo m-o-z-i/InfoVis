@@ -129,33 +129,7 @@ d3.json("asyl.json", function(error, data) {
         .attr('height', legendRectSize)                        
         .style('fill', color)                                  
         .style('stroke', color)
-        .on('click', function(label) {
-            var rect = d3.select(this);
-            var enabled = true;
-
-            if (rect.attr('class') === 'disabled') {
-                rect.attr('class', '');
-            } else {
-                rect.attr('class', 'disabled');
-                enabled = false;
-            }
-
-            partition.value(function(d) {
-                if (d.label === label) d.enabled = enabled;
-                return (d.enabled) ? d.count : 0;
-            });
-
-            path = path.data(partition(data));
-            path.transition()
-                .duration(750)
-                .attrTween('d', function(d){
-                    var interpolate = d3.interpolate(this._current, d);
-                    this._current = interpolate(0);
-                    return function(t) {
-                        return arc(interpolate(t));
-                    };
-                });
-        });                
+        .on('click', clickLegend);                
 
     function clickLegend(d) {
         var rect = d3.select(this);
@@ -167,25 +141,14 @@ d3.json("asyl.json", function(error, data) {
             rect.attr('class', 'disabled');
             enabled = false;
         }
-
-        partition.value(function(d) {
-            //if (d.label === label) d.enabled = enabled;
-            return (d.enabled) ? d.count : 0;
-        });
-
-        path = path.data(partition.nodes(data));
-        path.transition()
-            .duration(750)
-            .attrTween('d', function(d){
-                var interpolate = d3.interpolate(this._current, d);
-                this._current = interpolate(0);
-                return function(t) {
-                    return arc(interpolate(t));
-                };
-        });
+        //updatePie(partition.nodes(data));
     }
 
     function clickPath(d) {
+        updatePie(d);
+    }
+
+    function updatePie(d){
         path.transition()
         .duration(750)
         .attrTween("d", arcTween(d));
