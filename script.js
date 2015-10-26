@@ -16,7 +16,7 @@ var width = 800,
     radius = Math.min(width, height) / 2,
     padding = 5,
     donutWidth = 75,
-    arcSpace = 5,
+    arcSpace = 0,
     legendRectSize = 18,
     legendSpacing = 4;
 
@@ -79,11 +79,18 @@ d3.json("asyl.json", function(error, data) {
     var path = svg.selectAll("path")
         .data(partition.nodes(data))
         .enter().append("path")
+        .attr("id", function(d, i) { return "path-" + i; })
         .attr("display", function(d) { if (/*d.size < 5 || !d.depth*/false) return "none";}) // hide inner ring
         .attr("d", arc)
         .style("fill", function(d) { return color( d.name); })
-        .on("click", clickPath)
-        .each(function(d){ this._current = d });
+        .each(function(d){ this._current = d })
+        .on("click", clickPath);
+
+    path.append("text")
+      .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+      .attr("dy", ".35em")
+      .style("text-anchor", "middle")
+      .text(function(d) { return d.name; });
 
     path.on('mouseover', function(d) {
         var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.size ;

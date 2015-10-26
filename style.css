@@ -19,12 +19,21 @@ rect.disabled {
 
 path {
   stroke: #fff;
-  stroke-width: 1;
+  stroke-width: 5;
   fill-rule: evenodd;
 }
 
 path:hover {
   fill: brown;
+}
+
+text {
+  font: 11px sans-serif;
+  cursor: pointer;
+}
+
+body {
+  font: 10px sans-serif;
 }
 
 .tooltip {
