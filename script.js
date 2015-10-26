@@ -94,9 +94,7 @@ d3.json("asyl.json", function(error, data) {
         tooltip.select('.percent').html('total percent: ' + percent + '%'); 
         tooltip.select('.percent-to-parent').html('percent to parent: ' + parentPercent + '%'); 
         tooltip.style('display', 'block');
-    });
-
-    path.on('mouseover', function(d) {
+        
         var enabled = d3.select(this).attr('class')
         console.log("data name: " + d.name + "  depth: " + d.depth + "  enabled: " + enabled);
     });
@@ -145,6 +143,7 @@ d3.json("asyl.json", function(error, data) {
     }
 
     function clickPath(d) {
+        console.log("data name: " + d.name + "  x: " + d.x + "  dx; " + d.dx+ "  y: " + d.y + "  d.dy:" + d.dy);
         updatePie(d);
     }
 
@@ -165,4 +164,9 @@ function arcTween(d) {
         ? function(t) { return arc(d); }
         : function(t) { arcLength.domain(xd(t)); arcDistance.domain(yd(t)).range(yr(t)); return arc(d); };
   };
+}
+
+function tween(d) {
+    window.alert("stop");  
+    return arc(d);
 }
