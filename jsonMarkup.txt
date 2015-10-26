@@ -1,0 +1,217 @@
+{
+        user_id: '{{index}}',
+        name: 'Flüchtlinge',
+        shortName: 'Anz.',
+        size: '10',
+        children: [
+            {
+                user_id: '{{index}}',
+                name: 'Deutschland',
+                shortName: 'DE',
+                size: '7',
+                children: [
+                    {
+                        user_id: '{{index}}',
+                        name: 'Syrien',
+                        shortName: 'sy',
+                        size: '3',
+                        children: [
+                            {
+                                user_id: '{{index}}',
+                                name: 'Männlich',
+                                shortName: 'O->',
+                                size: '2',
+                                children: [
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'unter gleich 18',
+                                    shortName: '<=18',
+                                    size: '1'
+                                  },
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'über 18',
+                                    shortName: '>18',
+                                    size: '1'
+                                  }
+                              ]
+                            },
+                            {
+                                user_id: '{{index}}',
+                                name: 'Weiblich',
+                                shortName: '+O',
+                                size: '1',
+                                children: [
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'unter gleich 18',
+                                    shortName: '<=18',
+                                    size: '1'
+                                  },
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'über 18',
+                                    shortName: '>18',
+                                    size: '0'
+                                  }
+                              ]
+                            }
+                          ]
+                    },
+                    {
+                        user_id: '{{index}}',
+                        name: 'Afghanistan',
+                        shortName: 'Afg',
+                        size: '4',
+                        children: [
+                            {
+                                user_id: '{{index}}',
+                                name: 'Männlich',
+                                shortName: 'O->',
+                                size: '3',
+                                children: [
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'unter gleich 18',
+                                    shortName: '<=18',
+                                    size: '3'
+                                  },
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'über 18',
+                                    shortName: '>18',
+                                    size: '0'
+                                  }
+                              ]
+                            },
+                            {
+                                user_id: '{{index}}',
+                                name: 'Weiblich',
+                                shortName: '+O',
+                                size: '1',
+                                children: [
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'unter gleich 18',
+                                    shortName: '<=18',
+                                    size: '0'
+                                  },
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'über 18',
+                                    shortName: '>18',
+                                    size: '1'
+                                  }
+                              ]
+                            }
+                          ]
+                    }
+                ]
+            },
+            {
+                user_id: '{{index}}',
+                name: 'Frankreich',
+                shortName: 'FRA',
+                size: '3',
+                children: [
+                    {
+                        user_id: '{{index}}',
+                        name: 'Syrien',
+                        shortName: 'sy',
+                        size: '2',
+                        children: [
+                            {
+                                user_id: '{{index}}',
+                                name: 'Männlich',
+                                shortName: 'O->',
+                                size: '2',
+                                children: [
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'unter gleich 18',
+                                    shortName: '<=18',
+                                    size: '2'
+                                  },
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'über 18',
+                                    shortName: '>18',
+                                    size: '0'
+                                  }
+                              ]
+                            },
+                            {
+                                user_id: '{{index}}',
+                                name: 'Weiblich',
+                                shortName: '+O',
+                                size: '0',
+                                children: [
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'unter gleich 18',
+                                    shortName: '<=18',
+                                    size: '0'
+                                  },
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'über 18',
+                                    shortName: '>18',
+                                    size: '0'
+                                  }
+                              ]
+                            }
+                          ]
+                    },
+                    {
+                        user_id: '{{index}}',
+                        name: 'Afghanistan',
+                        shortName: 'Afg',
+                        size: '1',
+                        children: [
+                            {
+                                user_id: '{{index}}',
+                                name: 'Männlich',
+                                shortName: 'O->',
+                                size: '0',
+                                children: [
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'unter gleich 18',
+                                    shortName: '<=18',
+                                    size: '0'
+                                  },
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'über 18',
+                                    shortName: '>18',
+                                    size: '0'
+                                  }
+                              ]
+                            },
+                            {
+                                user_id: '{{index}}',
+                                name: 'Weiblich',
+                                shortName: '+O',
+                                size: '1',
+                                children: [
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'unter gleich 18',
+                                    shortName: '<=18',
+                                    size: '1'
+                                  },
+                                  {
+                                    user_id: '{{index}}',
+                                    name: 'über 18',
+                                    shortName: '>18',
+                                    size: '0'
+                                  }
+                              ]
+                            }
+                          ]
+                    }
+                ]
+            }
+          
+        ]
+}

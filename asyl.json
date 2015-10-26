@@ -1,0 +1,216 @@
+{
+  "depth": "function (a){return this.currentIndex+(a||0)}",
+  "name": "Flüchtlinge",
+  "shortName": "Anz.",
+  "size": 10,
+  "children": [
+    {
+      "depth": "function (a){return this.currentIndex+(a||0)}",
+      "name": "Deutschland",
+      "shortName": "DE",
+      "size": 7,
+      "children": [
+        {
+          "depth": "function (a){return this.currentIndex+(a||0)}",
+          "name": "Syrien",
+          "shortName": "sy",
+          "size": 3,
+          "children": [
+            {
+              "depth": "function (a){return this.currentIndex+(a||0)}",
+              "name": "Männlich",
+              "shortName": "O->",
+              "size": 2,
+              "children": [
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "unter gleich 18",
+                  "shortName": "<=18",
+                  "size": 1
+                },
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "über 18",
+                  "shortName": ">18",
+                  "size": 1
+                }
+              ]
+            },
+            {
+              "depth": "function (a){return this.currentIndex+(a||0)}",
+              "name": "Weiblich",
+              "shortName": "+O",
+              "size": 1,
+              "children": [
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "unter gleich 18",
+                  "shortName": "<=18",
+                  "size": 1
+                },
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "über 18",
+                  "shortName": ">18",
+                  "size": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "depth": "function (a){return this.currentIndex+(a||0)}",
+          "name": "Afghanistan",
+          "shortName": "Afg",
+          "size": 4,
+          "children": [
+            {
+              "depth": "function (a){return this.currentIndex+(a||0)}",
+              "name": "Männlich",
+              "shortName": "O->",
+              "size": 3,
+              "children": [
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "unter gleich 18",
+                  "shortName": "<=18",
+                  "size": 3
+                },
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "über 18",
+                  "shortName": ">18",
+                  "size": 0
+                }
+              ]
+            },
+            {
+              "depth": "function (a){return this.currentIndex+(a||0)}",
+              "name": "Weiblich",
+              "shortName": "+O",
+              "size": 1,
+              "children": [
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "unter gleich 18",
+                  "shortName": "<=18",
+                  "size": 0
+                },
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "über 18",
+                  "shortName": ">18",
+                  "size": 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "depth": "function (a){return this.currentIndex+(a||0)}",
+      "name": "Frankreich",
+      "shortName": "FRA",
+      "size": 3,
+      "children": [
+        {
+          "depth": "function (a){return this.currentIndex+(a||0)}",
+          "name": "Syrien",
+          "shortName": "sy",
+          "size": 2,
+          "children": [
+            {
+              "depth": "function (a){return this.currentIndex+(a||0)}",
+              "name": "Männlich",
+              "shortName": "O->",
+              "size": 2,
+              "children": [
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "unter gleich 18",
+                  "shortName": "<=18",
+                  "size": 2
+                },
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "über 18",
+                  "shortName": ">18",
+                  "size": 0
+                }
+              ]
+            },
+            {
+              "depth": "function (a){return this.currentIndex+(a||0)}",
+              "name": "Weiblich",
+              "shortName": "+O",
+              "size": 0,
+              "children": [
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "unter gleich 18",
+                  "shortName": "<=18",
+                  "size": 0
+                },
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "über 18",
+                  "shortName": ">18",
+                  "size": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "depth": "function (a){return this.currentIndex+(a||0)}",
+          "name": "Afghanistan",
+          "shortName": "Afg",
+          "size": 1,
+          "children": [
+            {
+              "depth": "function (a){return this.currentIndex+(a||0)}",
+              "name": "Männlich",
+              "shortName": "O->",
+              "size": 0,
+              "children": [
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "unter gleich 18",
+                  "shortName": "<=18",
+                  "size": 0
+                },
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "über 18",
+                  "shortName": ">18",
+                  "size": 0
+                }
+              ]
+            },
+            {
+              "depth": "function (a){return this.currentIndex+(a||0)}",
+              "name": "Weiblich",
+              "shortName": "+O",
+              "size": 1,
+              "children": [
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "unter gleich 18",
+                  "shortName": "<=18",
+                  "size": 1
+                },
+                {
+                  "depth": "function (a){return this.currentIndex+(a||0)}",
+                  "name": "über 18",
+                  "shortName": ">18",
+                  "size": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
