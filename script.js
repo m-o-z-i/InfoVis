@@ -86,11 +86,12 @@ d3.json("asyl.json", function(error, data) {
         .each(function(d){ this._current = d });
 
     path.on('mouseover', function(d) {
-        var parentSize = d.parent.size;
+        var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.size ;
+
         var percent = Math.round(1000 * d.value / total) / 10;
         var parentPercent = Math.round(1000 * d.value / parentSize) / 10;
         tooltip.select('.label').html('<b>' + d.name + '</b>' );
-        tooltip.select('.count').html('count: ' + d.size); 
+        //tooltip.select('.count').html('count: ' + d.size); 
         tooltip.select('.percent').html('total percent: ' + percent + '%'); 
         tooltip.select('.percent-to-parent').html('percent to parent: ' + parentPercent + '%'); 
         tooltip.style('display', 'block');
