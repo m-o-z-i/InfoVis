@@ -1,11 +1,7 @@
 /* ### QUESTIONS ### 
 /*  what is d
-/*  print debug
 /*  auto complete... (plugins)
 /*  how to change order per drag and drop
-/*
-/*
-/*
 /* ################# */
 
 
@@ -21,6 +17,7 @@ var width = 800,
     legendSpacing = 4;
 
 var color = d3.scale.category20b();
+// own scale .. 
 
 var arcLength = d3.scale.linear()
     .range([0, 2 * Math.PI]);
@@ -69,7 +66,6 @@ tooltip.append('div')
 d3.json("asyl.json", function(error, data) {
     if (error) throw error;
 
-    // could be done outside...
     var total = data.size;
     console.log("total data size: " + total);
     console.log("data name: " + data.name);
@@ -86,11 +82,19 @@ d3.json("asyl.json", function(error, data) {
         .each(function(d){ this._current = d })
         .on("click", clickPath);
 
-    path.append("text")
-      .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
-      .attr("dy", ".35em")
-      .style("text-anchor", "middle")
-      .text(function(d) { return d.name; });
+    var text = svg.selectAll("text")
+        .data(partition.nodes(data))
+        .enter()
+        .append("text")
+        .attr("x", function(d) { return arc.centroid(d)[0]} )
+        .attr("y", function(d) { return arc.centroid(d)[1]} )
+        // .attr("transform", function(d) { 
+        //   return "translate(" + arc.centroid(d) + ")"; 
+        // })
+        .attr("dy", ".35em")
+        .style("text-anchor", "middle")
+        .text(function(d) { return d.name; })
+
 
     path.on('mouseover', function(d) {
         var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.size ;
@@ -104,7 +108,7 @@ d3.json("asyl.json", function(error, data) {
         tooltip.style('display', 'block');
         
         var enabled = d3.select(this).attr('class')
-        console.log("data name: " + d.name + "  depth: " + d.depth + "  enabled: " + enabled);
+        // console.log("data name: " + d.name + "  depth: " + d.depth + "  enabled: " + enabled);
     });
 
     path.on('mouseout', function(d) {
@@ -147,7 +151,7 @@ d3.json("asyl.json", function(error, data) {
             rect.attr('class', 'disabled');
             enabled = false;
         }
-        //updatePie(partition.nodes(data));
+        updatePie(partition.nodes(data.depth));
     }
 
     function clickPath(d) {
