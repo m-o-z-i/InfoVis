@@ -24,13 +24,13 @@
               "children": [
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "unter gleich 18",
+                  "name": "<=18",
                   "shortName": "<=18",
                   "size": 1
                 },
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "über 18",
+                  "name": ">18",
                   "shortName": ">18",
                   "size": 1
                 }
@@ -44,13 +44,13 @@
               "children": [
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "unter gleich 18",
+                  "name": "<=18",
                   "shortName": "<=18",
                   "size": 1
                 },
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "über 18",
+                  "name": ">18",
                   "shortName": ">18",
                   "size": 0
                 }
@@ -72,13 +72,13 @@
               "children": [
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "unter gleich 18",
+                  "name": "<=18",
                   "shortName": "<=18",
                   "size": 3
                 },
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "über 18",
+                  "name": ">18",
                   "shortName": ">18",
                   "size": 0
                 }
@@ -92,13 +92,13 @@
               "children": [
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "unter gleich 18",
+                  "name": "<=18",
                   "shortName": "<=18",
                   "size": 0
                 },
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "über 18",
+                  "name": ">18",
                   "shortName": ">18",
                   "size": 1
                 }
@@ -128,13 +128,13 @@
               "children": [
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "unter gleich 18",
+                  "name": "<=18",
                   "shortName": "<=18",
                   "size": 2
                 },
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "über 18",
+                  "name": ">18",
                   "shortName": ">18",
                   "size": 0
                 }
@@ -148,13 +148,13 @@
               "children": [
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "unter gleich 18",
+                  "name": "<=18",
                   "shortName": "<=18",
                   "size": 0
                 },
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "über 18",
+                  "name": ">18",
                   "shortName": ">18",
                   "size": 0
                 }
@@ -176,13 +176,13 @@
               "children": [
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "unter gleich 18",
+                  "name": "<=18",
                   "shortName": "<=18",
                   "size": 0
                 },
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "über 18",
+                  "name": ">18",
                   "shortName": ">18",
                   "size": 0
                 }
@@ -196,13 +196,13 @@
               "children": [
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "unter gleich 18",
+                  "name": "<=18",
                   "shortName": "<=18",
                   "size": 1
                 },
                 {
                   "depth": "function (a){return this.currentIndex+(a||0)}",
-                  "name": "über 18",
+                  "name": ">18",
                   "shortName": ">18",
                   "size": 0
                 }
