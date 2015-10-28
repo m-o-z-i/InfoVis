@@ -41,45 +41,30 @@ var arc = d3.svg.arc()
 d3.json("asyl.json", function(error, data) {
     if (error) throw error;
 
-    draw(data, setup(data));
+    draw(data);
 });
 
 
-function setup (data) {
+// define svg element, that is locatet in the middle of diagram
+var svg = d3.select('#chart')
+    .append("svg")
+    .attr("width", vis.width + vis.legendWidth)
+    .attr("height", vis.height)
+    .append("g");
 
-    // define svg element, that is locatet in the middle of diagram
-    var svg = d3.select('#chart')
-        .append("svg")
-        .attr("width", vis.width + vis.legendWidth)
-        .attr("height", vis.height)
-        .append("g")
-        .attr("transform", "translate(" + vis.width / 2 + "," + (vis.height / 2) + ")");
 
-    //group
-    var arcPart = svg.append("g");
+//arcPart group
+svg.append("g")
+    .attr('class', "slices");
+svg.append("g")
+    .attr('class', "labels");
 
-    // map data to donut part
-    var path = svg.selectAll("path")
-        .data(partition.nodes(data))
-        .enter().append("path");
 
-    // labeling
-    var label = svg.selectAll("text")
-        .data(partition.nodes(data))
-        .enter().append("text");
+svg.attr("transform", "translate(" + vis.width / 2 + "," + (vis.height / 2) + ")");
 
-    var values = [svg, path, label, arcPart];
 
-    return values;
-}
-
-function draw(data, setup)
+function draw(data)
 {
-    var svg     = setup[0];
-    var path    = setup[1];
-    var label   = setup[2];
-    var arcPart = setup[3];
-
     var totalSize = data.size;
 
     // create arc visualisation
@@ -100,14 +85,21 @@ function draw(data, setup)
         .attr('class', 'percent-to-parent');
 
 
-    // ********************     arc Part      ************************************** //
-    path.attr("id", function(d, i) { return "path-" + i; })
+    // ********************     pie slices      ************************************** //
+    var slice = svg.select(".slices").selectAll("path.slice")
+        .data(partition.nodes(data));
+
+
+    slice.enter()
+        .insert("path")
+        .style("fill", function(d) { return color(d.name); })
+        .attr('class', "slice")
+        .attr("id", function(d, i) { return "path-" + i; })
         .attr("d", arc)
         .attr("fill-rule", "evenodd")
-        .style("fill", function(d) { return color(d.name); })
-        .on("click", clickPath);
+        .on("click", clickSlice);
 
-    path.on('mouseover', function(d) {
+    slice.on('mouseover', function(d) {
         var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.size ;
 
         var percent = Math.round(1000 * d.value / totalSize) / 10;
@@ -123,28 +115,44 @@ function draw(data, setup)
         console.log("data name: " + d.name + "  depth: " + d.depth + "  visible? : " + toSmall);
     });
 
-    path.on('mouseout', function(d) {
+    slice.on('mouseout', function(d) {
         tooltip.style('display', 'none');
     });
 
-    path.on('mousemove', function(d) {
+    slice.on('mousemove', function(d) {
         tooltip.style('left', (d3.event.pageX) + 'px')
                .style('top', (d3.event.pageY) + 'px');
     });
+
+    slice.exit()
+        .remove();
     // ***************************************************************************** //
 
 
 
     // **************************     label            ***************************** //
-    label.attr("id", function(d, i) { return  i; })
+    var text = svg.select(".labels").selectAll("text")
+        .data(partition.nodes(data));
+
+    text.enter()
+        .append("text")
+        .attr("dy", ".35em")
+        .attr("id", function(d, i) { return "label-" + i; })
+        .attr("display", function(d) { if (d.size ==  0) return "none";})
+        .style("text-anchor", "middle")
         .attr("transform", function(d) { 
           return "translate(" + arc.centroid(d) + ")"; 
         })
-        .attr("dy", ".35em")
-        .attr("display", function(d) { if (d.size ==  0) return "none";})
-        .style("text-anchor", "middle")
         .text(function(d) { return d.name; });
+
+    function midAngle(d){
+        return d.startAngle + (d.endAngle - d.startAngle)/2;
+    }
+
+    text.exit()
+        .remove();
     // ***************************************************************************** //
+
 
     
     // *******************************     legend   ********************************* //
@@ -183,7 +191,7 @@ function draw(data, setup)
     // ***************************************************************************** //              
 
 
-    function clickPath(d) {
+/*    function click(d) {
         var bbox = this.getBBox();
 
         path.attr('display', function(d) {if (bbox.width < 0.1) return "none";});
@@ -203,21 +211,26 @@ function draw(data, setup)
 
         updatePie(d);
         updateLabels(d);
-    }
+    }*/
 
-    function updatePie(d){
-        path.transition()
-        .duration(750)
-        .attrTween("d", arcTween(d));
+    function updateSlices(d){
+        slice.transition()
+        .duration(duration)
+        .attrTween("d", arcTween(d))
+        .each("end", updateLabels);
     }
-
     function updateLabels(d){
-
-
-        
+        text.transition().duration(duration)
+        .attr("transform", function(d) { 
+          return "translate(" + arc.centroid(d) + ")"; 
+        })
+        .attr("display", function(d) {if (this.x < 0.1 && this.y > -0.1) return "none";});
     }
 
-
+    function clickSlice(d){
+        updateSlices(d);
+        updateLabels(d);
+    }
 }
 
 function isParentOf(p, c) {
