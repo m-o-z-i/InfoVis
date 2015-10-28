@@ -104,7 +104,7 @@ function draw(data, setup)
         var percent = Math.round(1000 * d.value / totalSize) / 10;
         var parentPercent = Math.round(1000 * d.value / parentSize) / 10;
         tooltip.select('.label').html('<b>' + d.name + '</b>' );
-        //tooltip.select('.count').html('count: ' + d.size); 
+        tooltip.select('.count').html('count: ' + d.size); 
         tooltip.select('.percent').html('total percent: ' + percent + '%'); 
         tooltip.select('.percent-to-parent').html('percent to parent: ' + parentPercent + '%'); 
         tooltip.style('display', 'block');
