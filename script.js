@@ -16,6 +16,11 @@ var arcLength = d3.scale.linear()
 var arcDistance = d3.scale.linear()
     .range([0, radius]);
 
+var x = d3.scale.linear().range([0, 2 * Math.PI]);
+var y = d3.scale.pow().exponent(1).domain([0, 1]).range([0, radius]);
+var padding = 10;
+var duration = 1000;
+
 // own scale ..     
 var color = d3.scale.category20b();
 
@@ -50,6 +55,9 @@ function setup (data) {
         .append("g")
         .attr("transform", "translate(" + vis.width / 2 + "," + (vis.height / 2) + ")");
 
+    //group
+    var arcPart = svg.append("g");
+
     // map data to donut part
     var path = svg.selectAll("path")
         .data(partition.nodes(data))
@@ -60,16 +68,17 @@ function setup (data) {
         .data(partition.nodes(data))
         .enter().append("text");
 
-    var values = [svg, path, label];
+    var values = [svg, path, label, arcPart];
 
     return values;
 }
 
 function draw(data, setup)
 {
-    var svg       = setup[0];
-    var path      = setup[1];
-    var label     = setup[2];
+    var svg     = setup[0];
+    var path    = setup[1];
+    var label   = setup[2];
+    var arcPart = setup[3];
 
     var totalSize = data.size;
 
@@ -93,10 +102,10 @@ function draw(data, setup)
 
     // ********************     arc Part      ************************************** //
     path.attr("id", function(d, i) { return "path-" + i; })
-        .attr("display", function(d) { if (/*d.size < 5 || !d.depth*/false) return "none";}) // hide inner ring
         .attr("d", arc)
+        .attr("fill-rule", "evenodd")
         .style("fill", function(d) { return color(d.name); })
-        .on("click", clickpath);
+        .on("click", clickPath);
 
     path.on('mouseover', function(d) {
         var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.size ;
@@ -110,7 +119,8 @@ function draw(data, setup)
         tooltip.style('display', 'block');
         
         // var enabled = d3.select(this).attr('class')
-        // console.log("data name: " + d.name + "  depth: " + d.depth + "  enabled: " + enabled);
+        var toSmall = d3.select(this).empty();
+        console.log("data name: " + d.name + "  depth: " + d.depth + "  visible? : " + toSmall);
     });
 
     path.on('mouseout', function(d) {
@@ -121,17 +131,12 @@ function draw(data, setup)
         tooltip.style('left', (d3.event.pageX) + 'px')
                .style('top', (d3.event.pageY) + 'px');
     });
-
-    function clickpath(d) {
-        console.log("data name: " + d.name + "  x: " + d.x + "  dx; " + d.dx+ "  y: " + d.y + "  d.dy:" + d.dy);
-        updatePie(d);
-    }
     // ***************************************************************************** //
 
 
 
     // **************************     label            ***************************** //
-    label.attr("id", function(d, i) { return "label-" + i; })
+    label.attr("id", function(d, i) { return  i; })
         .attr("transform", function(d) { 
           return "translate(" + arc.centroid(d) + ")"; 
         })
@@ -178,11 +183,63 @@ function draw(data, setup)
     // ***************************************************************************** //              
 
 
+    function clickPath(d) {
+        var bbox = this.getBBox();
+
+        path.attr('display', function(d) {if (bbox.width < 0.1) return "none";});
+
+        console.log("path pos: " + bbox.width);
+        console.log("data name: " + d.name + "  x: " + d.x + "  dx; " + d.dx+ "  y: " + d.y + "  d.dy:" + d.dy);
+
+        label.attr("transform", function(d) { 
+          return "translate(" + arc.centroid(d) + ")"; 
+        })
+        .attr("dy", ".35em")
+        .attr("display", function(d) { 
+            if (d.size ==  0 || this.getBBox.width < 0.1) return "none";
+        })
+        .style("text-anchor", "middle")
+        .text(function(d) { return d.name; });
+
+        updatePie(d);
+        updateLabels(d);
+    }
+
     function updatePie(d){
         path.transition()
         .duration(750)
         .attrTween("d", arcTween(d));
     }
+
+    function updateLabels(d){
+
+
+        
+    }
+
+
+}
+
+function isParentOf(p, c) {
+  if (p === c) return true;
+  if (p.children) {
+    return p.children.some(function(d) {
+      return isParentOf(d, c);
+    });
+  }
+  return false;
+}
+
+function colour(d) {
+  if (d.children) {
+    // There is a maximum of two children!
+    var colours = d.children.map(colour),
+        a = d3.hsl(colours[0]),
+        b = d3.hsl(colours[1]);
+    // L*a*b* might be better here...
+    return d3.hsl((a.h + b.h) / 2, a.s * 1.2, a.l / 1.2);
+  }
+  return d.colour || "#fff";
 }
 
 // Interpolate the scales!
@@ -196,3 +253,4 @@ function arcTween(d) {
         : function(t) { arcLength.domain(xd(t)); arcDistance.domain(yd(t)).range(yr(t)); return arc(d); };
   };
 }
+
