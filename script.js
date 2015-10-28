@@ -136,6 +136,7 @@ function draw(data, setup)
           return "translate(" + arc.centroid(d) + ")"; 
         })
         .attr("dy", ".35em")
+        .attr("display", function(d) { if (d.size ==  0) return "none";})
         .style("text-anchor", "middle")
         .text(function(d) { return d.name; });
     // ***************************************************************************** //
