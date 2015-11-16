@@ -59,6 +59,15 @@ svg.append("g")
 svg.append("g")
     .attr('class', "labels");
 
+/*    //arcPart group
+arcPartGroup = svg.append("g");
+
+slice = arcPartGroup.append("slices")
+    .attr('class', "slices");
+
+labels = arcPartGroup.append("labels")
+    .attr('class', "labels");*/
+
 
 svg.attr("transform", "translate(" + vis.width / 2 + "," + (vis.height / 2) + ")");
 
@@ -153,66 +162,6 @@ function draw(data)
         .remove();
     // ***************************************************************************** //
 
-
-    
-    // *******************************     legend   ********************************* //
-    var legend = svg.selectAll('.legend')                    
-        .data(color.domain())                                  
-        .enter()                                               
-        .append('g')                                           
-        .attr('class', 'legend')                               
-        .attr('transform', function(d, i) {                    
-            var height = vis.legendRectSize + vis.legendSpacing;         
-            var offset =  height * color.domain().length / 2;    
-            var horz = vis.width/2 + 100 -2 * vis.legendRectSize;                      
-            var vert = i * height - offset;                      
-            return 'translate(' + horz + ',' + vert + ')';       
-    }); 
-
-    legend.append('rect')                                       
-        .attr('width', vis.legendRectSize)                         
-        .attr('height', vis.legendRectSize)                        
-        .style('fill', color)                                  
-        .style('stroke', color)
-        .on('click', clickLegend);
-
-    function clickLegend(d) {
-        var rect = d3.select(this);
-        var enabled = true;
-
-        if (rect.attr('class') === 'disabled') {
-            rect.attr('class', '');
-        } else {
-            rect.attr('class', 'disabled');
-            enabled = false;
-        }
-        //updatePie(partition.nodes(data.depth));
-    }
-    // ***************************************************************************** //              
-
-
-/*    function click(d) {
-        var bbox = this.getBBox();
-
-        path.attr('display', function(d) {if (bbox.width < 0.1) return "none";});
-
-        console.log("path pos: " + bbox.width);
-        console.log("data name: " + d.name + "  x: " + d.x + "  dx; " + d.dx+ "  y: " + d.y + "  d.dy:" + d.dy);
-
-        label.attr("transform", function(d) { 
-          return "translate(" + arc.centroid(d) + ")"; 
-        })
-        .attr("dy", ".35em")
-        .attr("display", function(d) { 
-            if (d.size ==  0 || this.getBBox.width < 0.1) return "none";
-        })
-        .style("text-anchor", "middle")
-        .text(function(d) { return d.name; });
-
-        updatePie(d);
-        updateLabels(d);
-    }*/
-
     function updateSlices(d){
         slice.transition()
         .duration(duration)
@@ -231,28 +180,6 @@ function draw(data)
         updateSlices(d);
         updateLabels(d);
     }
-}
-
-function isParentOf(p, c) {
-  if (p === c) return true;
-  if (p.children) {
-    return p.children.some(function(d) {
-      return isParentOf(d, c);
-    });
-  }
-  return false;
-}
-
-function colour(d) {
-  if (d.children) {
-    // There is a maximum of two children!
-    var colours = d.children.map(colour),
-        a = d3.hsl(colours[0]),
-        b = d3.hsl(colours[1]);
-    // L*a*b* might be better here...
-    return d3.hsl((a.h + b.h) / 2, a.s * 1.2, a.l / 1.2);
-  }
-  return d.colour || "#fff";
 }
 
 // Interpolate the scales!
