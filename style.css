@@ -1,23 +1,12 @@
-.legend {
-	font-size: 12px;
-}
-
-rect {
-	cursor: pointer;
-	stroke-width: 2;
-}
-
-rect.disabled {
-	fill: transparent !important;
-}
-
-#chart {
-  height: 800px;                        
-  position: relative;
-  width: 800px;
+.title {
+  color: #333;
+  font-size: 21px;
+  text-align: center;
+  text-anchor: middle;
 }
 
 path {
+  fill: grey;
   stroke: #fff;
   stroke-width: 5;
   fill-rule: evenodd;
@@ -25,15 +14,6 @@ path {
 
 path:hover {
   fill: brown;
-}
-
-text {
-  font: 11px sans-serif;
-  cursor: pointer;
-}
-
-body {
-  font: 10px sans-serif;
 }
 
 .tooltip {
@@ -48,5 +28,11 @@ body {
   text-align: center;
   top: 95px;
   width: 80px;
-  z-index: 10;
+}
+
+.label {
+  color: white;
+  font-size: 14px;
+  text-align: center;
+  text-anchor: middle;
 }
