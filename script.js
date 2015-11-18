@@ -28,6 +28,7 @@ var arc = d3.svg.arc()
 // load and process data
 d3.json("asyl.json", function(error, data) {
     if (error) throw error;
+    //console.log(data);
     draw(data);
 });
 
@@ -48,22 +49,13 @@ svg.append("g")
 svg.append("g")
     .attr('class', "labels");
 
-/*    //arcPart group
-arcPartGroup = svg.append("g");
-
-slice = arcPartGroup.append("slices")
-    .attr('class', "slices");
-
-labels = arcPartGroup.append("labels")
-    .attr('class', "labels");*/
-
 
 function draw(data)
 {
     var totalSize = data.size;
 
     // create arc visualisation
-    console.log("call draw method:");
+    //console.log("call draw method:");
 
     // *********************    tooltip / infobox   ******************************** //
     var tooltip = d3.select('#cirlceSet')
@@ -84,14 +76,14 @@ function draw(data)
         .data(partition.nodes(data));
 
     slice.enter()
-        .insert("path")
-        //.style("fill", function(d) { return color(d.name); })
+        .append("path")
+        .style("fill", "grey")
         .attr('class', "slice")
         .attr("id", function(d, i) { return "path-" + i; })
         .attr("d", arc)
         .attr('display', function(d, i) {if(i==0) return "none";});
 
-    slice.on('mouseover', function(d) {
+    slice.on('mouseenter', function(d) {
         var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.size ;
 
         var percent = Math.round(1000 * d.value / totalSize) / 10;
@@ -101,26 +93,19 @@ function draw(data)
         tooltip.select('.percent').html('total percent: ' + percent + '%'); 
         tooltip.select('.percent-to-parent').html('percent to parent: ' + parentPercent + '%'); 
         tooltip.style('display', 'block');
-        
-        // var enabled = d3.select(this).attr('class')
-        var toSmall = d3.select(this).empty();
-        console.log("data name: " + d.name + "  depth: " + d.depth + "  visible? : " + toSmall);
     });
-
-    slice.on('mouseout', function(d) {
-        tooltip.style('display', 'none');
-    });
-
     slice.on('mousemove', function(d) {
-        tooltip.style('left', (d3.event.pageX) + 'px')
-               .style('top', (d3.event.pageY) + 'px');
+        tooltip.style('left', (d3.event.pageX + 2) + 'px')
+               .style('top', (d3.event.pageY + 2) + 'px');
+    });
+
+    slice.on('mouseleave', function(d) {
+        tooltip.style('display', 'none');
     });
 
     slice.exit()
         .remove();
     // ***************************************************************************** //
-
-
 
     // **************************     label            ***************************** //
     var text = svg.select(".labels").selectAll("text")
@@ -131,6 +116,7 @@ function draw(data)
             if (i == 0) return "title";
             else return "label";
         })
+        .attr("pointer-events", "none")
         .attr("dy", ".35em")
         .attr("id", function(d, i) { return "label-" + i; })
         .attr("display", function(d, i) { if (d.size ==  0) return "none";})
@@ -149,5 +135,11 @@ function draw(data)
     text.exit()
         .remove();
     // ***************************************************************************** //
+
+
+
+
 }
+
+
 

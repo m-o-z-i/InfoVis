@@ -17,6 +17,7 @@ path:hover {
 }
 
 .tooltip {
+  pointer-events: none;
   background: #eee;
   box-shadow: 0 0 5px #999999;
   color: #333;
@@ -31,8 +32,9 @@ path:hover {
 }
 
 .label {
-  color: white;
+  color: black;
   font-size: 14px;
   text-align: center;
   text-anchor: middle;
 }
+
