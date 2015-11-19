@@ -14,8 +14,8 @@ var duration = 1000;
 
 // define partition size
 var partition = d3.layout.partition()
-    .value(function(d) { return d.size; })
-    .sort(null);
+    //.sort(null);
+    .value(function(d) { return d.size; });
 
 // init arc donut ring
 var arc = d3.svg.arc()
@@ -49,6 +49,18 @@ svg.append("g")
 svg.append("g")
     .attr('class', "labels");
 
+// add tooltip to DOM
+var tooltip = d3.select('#cirlceSet')
+    .append('div')
+    .attr('class', 'tooltip');
+tooltip.append('div')
+    .attr('class', 'label');
+tooltip.append('div')
+    .attr('class', 'count');
+tooltip.append('div')
+    .attr('class', 'percent');
+tooltip.append('div')
+    .attr('class', 'percent-to-parent');
 
 function draw(data)
 {
@@ -58,17 +70,7 @@ function draw(data)
     //console.log("call draw method:");
 
     // *********************    tooltip / infobox   ******************************** //
-    var tooltip = d3.select('#cirlceSet')
-        .append('div')
-        .attr('class', 'tooltip');
-    tooltip.append('div')
-        .attr('class', 'label');
-    tooltip.append('div')
-        .attr('class', 'count');
-    tooltip.append('div')
-        .attr('class', 'percent');
-    tooltip.append('div')
-        .attr('class', 'percent-to-parent');
+    var tooltip = d3.select('.tooltip')
 
 
     // ********************     pie slices      ************************************** //
@@ -77,7 +79,6 @@ function draw(data)
 
     slice.enter()
         .append("path")
-        .style("fill", "grey")
         .attr('class', "slice")
         .attr("id", function(d, i) { return "path-" + i; })
         .attr("d", arc)
@@ -111,7 +112,10 @@ function draw(data)
     var text = svg.select(".labels").selectAll("text")
         .data(partition.nodes(data));
 
-  var textEnter = text.enter().append("text")
+    var removeTSpan = d3.selectAll('.secondRow')
+    removeTSpan.remove();
+
+    var textEnter = text.enter().append("text")
         .attr('class', function(d, i) {
             if (i == 0) return "title";
             else return "label";
@@ -122,23 +126,17 @@ function draw(data)
         .attr("display", function(d, i) { if (d.size ==  0) return "none";})
         .attr("transform", function(d, i) { 
             if (i != 0) return "translate(" + arc.centroid(d) + ")";
-        });
+        })
+        .text(function(d) { return d.name; });
 
-  textEnter.append("tspan")
-      .attr("x", 0)
-      .text(function(d) { return d.name; });
-  textEnter.append("tspan")
-      .attr("x", 0)
-      .attr("dy", "1em")
-      .text(function(d, i) { if (i==0) return d.size; });
+    textEnter.append("tspan")
+        .attr("x", 0)
+        .attr("dy", "1em")
+        .text(function(d, i) { if (i==0) return d.size; });
 
     text.exit()
         .remove();
     // ***************************************************************************** //
-
-
-
-
 }
 
 
