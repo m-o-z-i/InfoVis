@@ -61,7 +61,9 @@ var arc = d3.svg.arc()
     .outerRadius(function(d) { return (d.y + d.dy);});
 
 // define svg element, that is locatet in the middle of diagram
-var svg = d3.select('#Visualisations')
+var svgCircle = d3.select('#Visualisations')
+  .append("div")
+    .attr('id', 'cirlceSetVis')
   .append("svg:svg")
     .attr("width", circleSetVis.width)
     .attr("height", circleSetVis.height)
@@ -85,19 +87,21 @@ tooltip.append('div')
 
 // ****************** Parallel Set ******************
 var parallelSetVis = {
-    width: 800,
-    height: 600
+    width: 700,
+    height: 500
 }
 
 var parallelSet = d3.parsets()
-    .dimensions(["asylCountry", "EUcountry", "gender", "age"])
+    .dimensions(["EUcountry", "asylCountry", "gender", "age"])
     .width(parallelSetVis.width)
     .height(parallelSetVis.height)
     .duration(duration);
 
 var svgParallel = d3.select('#Visualisations')
-    .append("svg")
-    .attr('x', circleSetVis.width)
+  .append("div")
+    .attr('id', 'parallelSetVis')
+  .append("svg")
+    //.attr('x', circleSetVis.width)
     .attr("width", parallelSet.width())
     .attr("height", parallelSet.height());
 
@@ -131,14 +135,14 @@ function draw(data)
     });
 
     // remove all
-    var toRemove = svg.selectAll("g")
+    var toRemove = svgCircle.selectAll("g")
         .remove();
 
     // *********************    tooltip / infobox   ******************************** //
     var tooltip = d3.select('.tooltip')
 
     // ********************     pie slices      ************************************** //
-    var dataGroup = svg.selectAll("g")
+    var dataGroup = svgCircle.selectAll("g")
         .data(partition(data), function(d, i) { return i; });
 
     dataGroup.selectAll('.slice')

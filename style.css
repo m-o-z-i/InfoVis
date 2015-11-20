@@ -58,3 +58,14 @@
 *::-webkit-selection {
     background:transparent;
 }
+
+#cirlceSetVis, #parallelSetVis
+{
+    display:inline;
+    vertical-align: middle;
+}
+
+#cirlceSetVis
+{
+    margin-right: 100px;
+}
