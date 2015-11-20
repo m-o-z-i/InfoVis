@@ -36,12 +36,20 @@ var duration = 1000;
 var padding = 10;
 var dragging = false;
 
-function comparator(a, b) {
-  return b.depth < a.depth;
+// ****************** Circle Set ********************
+// visualisation settings
+var circleSetVis = {
+    width: 600,
+    height: 600
 }
 
+var radius = Math.min(circleSetVis.width, circleSetVis.height) / 2;
+var arcLength = d3.scale.linear().range([0, 2 * Math.PI]);
+var arcDistance = d3.scale.linear().range([0, radius]);
+
+// define partition size
 var partition = d3.layout.partition()
-    .sort(comparator)
+    //.sort(comparator)
     .size([2 * Math.PI, radius])
     //.children(function(d) { return isNaN(d.value) ? d3.entries(d.size) : null; })
     .value(function(d) { return d.size; });
@@ -53,12 +61,12 @@ var arc = d3.svg.arc()
     .outerRadius(function(d) { return (d.y + d.dy);});
 
 // define svg element, that is locatet in the middle of diagram
-var svg = d3.select('#chart')
+var svg = d3.select('#Visualisations')
   .append("svg:svg")
-    .attr("width", vis.width)
-    .attr("height", vis.height)
+    .attr("width", circleSetVis.width)
+    .attr("height", circleSetVis.height)
   .append("svg:g")
-    .attr("transform", "translate(" + vis.width / 2 + "," + (vis.height / 2) + ")");
+    .attr("transform", "translate(" + circleSetVis.width / 2 + "," + (circleSetVis.height / 2) + ")");
 
 // add tooltip to DOM
 var tooltip = d3.select('#chart')
@@ -72,27 +80,42 @@ tooltip.append('div')
     .attr('class', 'percent');
 tooltip.append('div')
     .attr('class', 'percent-to-parent');
+// **************************************************
 
+
+// ****************** Parallel Set ******************
+var parallelSetVis = {
+    width: 800,
+    height: 600
+}
+
+var parallelSet = d3.parsets()
+    .dimensions(["asylCountry", "EUcountry", "gender", "age"])
+    .width(parallelSetVis.width)
+    .height(parallelSetVis.height)
+    .duration(duration);
+
+var svgParallel = d3.select('#Visualisations')
+    .append("svg")
+    .attr('x', circleSetVis.width)
+    .attr("width", parallelSet.width())
+    .attr("height", parallelSet.height());
+
+d3.csv("asyl.csv", function(csv) {
+    svgParallel.datum(csv).call(parallelSet);
+});
+// **************************************************
+
+
+// ****************** Load Data ********************
 var data;
-
 // load and process data
 d3.json("asyl.json", function(error, root) {
     if (error) throw error;
     partition(root);
     data = root;
-    //transformTree(root);
-
     draw(root)
 });
-
-function length(x, y){
-    return Math.sqrt(x*x + y*y);
-}
-
-function rad2deg(angle) {
-    // (angle / 180) * Math.PI;
-    return angle * (180 /  Math.PI);
-}
 
 var drag = d3.behavior.drag();
 
@@ -142,7 +165,6 @@ function draw(data)
     dataGroup.exit()
         .remove();
     // ***************************************************************************** //
-
 
     // **************************     label            ***************************** //
     dataGroup.selectAll('.label')
@@ -635,4 +657,13 @@ function pruneName(root, name) {
     else return false;
 }
 
+
+function length(x, y){
+    return Math.sqrt(x*x + y*y);
+}
+
+function rad2deg(angle) {
+    // (angle / 180) * Math.PI;
+    return angle * (180 /  Math.PI);
+}
 
