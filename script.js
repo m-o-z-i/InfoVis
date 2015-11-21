@@ -6,6 +6,8 @@ var vis = {
     donutWidth: 75
 }
 
+var color = d3.scale.category20c();
+
 var radius = Math.min(vis.width, vis.height) / 2;
 var arcLength = d3.scale.linear().range([0, 2 * Math.PI]);
 var arcDistance = d3.scale.linear().range([0, radius]);
@@ -24,44 +26,16 @@ var arc = d3.svg.arc()
     .innerRadius(function(d) { return Math.max(0, arcDistance(d.y)); })
     .outerRadius(function(d) { return Math.max(0, arcDistance(d.y + d.dy)); });
 
-
-// load and process data
-d3.json("asyl.json", function(error, data) {
-    if (error) throw error;
-    partition(data);
-    console.log("first input data: ");
-    console.log(data);
-    console.log("#####################################");
-
-    var newData = transformTree(data);
-    //var newData = data;
-
-    console.log("#####################################");
-    console.log("transformed data:  ");
-    console.log(newData);
-    console.log("#####################################");
-
-    draw(newData)
-});
-
 // define svg element, that is locatet in the middle of diagram
-var svg = d3.select('#cirlceSet')
-    .append("svg")
+var svg = d3.select('#chart')
+  .append("svg:svg")
     .attr("width", vis.width)
     .attr("height", vis.height)
-    .append("g");
-svg.attr("transform", "translate(" + vis.width / 2 + "," + (vis.height / 2) + ")");
-
-// add slices to DOM
-svg.append("g")
-    .attr('class', "slices");
-
-// add labels to DOM
-svg.append("g")
-    .attr('class', "labels");
+  .append("svg:g")
+    .attr("transform", "translate(" + vis.width / 2 + "," + (vis.height / 2) + ")");
 
 // add tooltip to DOM
-var tooltip = d3.select('#cirlceSet')
+var tooltip = d3.select('#chart')
     .append('div')
     .attr('class', 'tooltip');
 tooltip.append('div')
@@ -74,23 +48,40 @@ tooltip.append('div')
     .attr('class', 'percent-to-parent');
 
 
+// load and process data
+d3.json("asyl.json", function(error, data) {
+    if (error) throw error;
+/*    partition(data);
+    console.log("first input data: ");
+    console.log(data);
+    console.log("#####################################");
+
+    var newData = transformTree(data);
+    //var newData = data;
+
+    console.log("#####################################");
+    console.log("transformed data:  ");
+    console.log(newData);
+    console.log("#####################################");*/
+
+    draw(data)
+});
+
+
 function draw(data)
 {
-    var totalSize = data.value;
-
-    // create arc visualisation
-    //console.log("call draw method:");
-
     // *********************    tooltip / infobox   ******************************** //
     var tooltip = d3.select('.tooltip')
+    var totalSize = data.value;
 
 
     // ********************     pie slices      ************************************** //
-    var slice = svg.select(".slices").selectAll("path.slice")
-        .data(partition(data));
+    var groupes = svg.selectAll("g")
+        .data(partition(data))
+        .enter()
+      .append("svg:g");
 
-    slice.enter()
-        .append("path")
+    var slice = groupes.append("svg:path")
         .attr('class', "slice")
         .attr("id", function(d, i) { return "path-" + i; })
         .attr("d", arc)
@@ -117,19 +108,11 @@ function draw(data)
     slice.on('mouseleave', function(d) {
         tooltip.style('display', 'none');
     });
-
-    slice.exit()
-        .remove();
     // ***************************************************************************** //
 
+
     // **************************     label            ***************************** //
-    var text = svg.select(".labels").selectAll("text")
-        .data(partition(data));
-
-    var removeTSpan = d3.selectAll('.secondRow')
-    removeTSpan.remove();
-
-    var textEnter = text.enter().append("text")
+    var text = groupes.append("svg:text")
         .attr('class', function(d, i) {
             if (i == 0) return "title";
             else return "label";
@@ -138,18 +121,18 @@ function draw(data)
         .attr("dy", ".35em")
         .attr("id", function(d, i) { return "label-" + i; })
         .attr("display", function(d, i) { if (d.value ==  0) return "none";})
+
         .attr("transform", function(d, i) { 
-            if (i != 0) return "translate(" + arc.centroid(d) + ")";
-        })
+            if (i != 0) { return "translate(" + arc.centroid(d) + ")"
+                 /*"rotate(" + (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 + ")"*/; 
+        }})
         .text(function(d) { return d.name; });
 
-    textEnter.append("tspan")
+    // for root node 
+    text.append("tspan")
         .attr("x", 0)
         .attr("dy", "1em")
-        .text(function(d, i) { if (i==0) return d.value; });
-
-    text.exit()
-        .remove();
+        .text(function(d, i) { if (i==0) return d.value; });   
     // ***************************************************************************** //
 
 }
