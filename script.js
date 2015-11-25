@@ -6,7 +6,12 @@ var vis = {
     donutWidth: 75
 }
 
-var color = d3.scale.category20c();
+//var color = d3.scale.category20c();
+var hue = d3.scale.category10();
+var luminance = d3.scale.sqrt()
+    .domain([6, -3])
+    .clamp(true)
+    .range([50, 90]);
 
 var radius = Math.min(vis.width, vis.height) / 2;
 var arcLength = d3.scale.linear().range([0, 2 * Math.PI]);
@@ -64,6 +69,13 @@ tooltip.append('div')
 // load and process data
 d3.json("asyl.json", function(error, data) {
     if (error) throw error;
+
+    partition.nodes(data)
+        .forEach(function(d) {
+            d.fill = fill(d);
+        });
+
+
 /*    partition(data);
     console.log("first input data: ");
     console.log(data);
@@ -96,13 +108,16 @@ function draw(data)
         .attr('class', "slice")
         .attr("id", function(d, i) { return "path-" + i; })
         .attr("d", arc)
-        .attr("fill", function(d) { 
+        /*.attr("fill", function(d) { 
             if (d.depth > 0){
                 return color(d.parent.name);
             } else {
                 return color(d.name); 
             }
-        })
+        })*/
+        .style("fill", function(d) { return fill(d); })
+        //.style("fill-opacity", function(d) { return d.depth === 2 - (data === d) ? 1 : 0; })
+        //.style("fill-opacity", function(d) { return d.depth === 1 + (data === d) ? 1 : 0; })
         .attr("fill-rule", "evenodd")
         .attr('display', function(d, i) {if(i==0) return "none";});
 
@@ -182,6 +197,21 @@ function transformTree(data){
 
     return newData;
 }
+
+function fill(d) {
+  var p = d;
+  while (p.depth > 1) p = p.parent;
+  var c = d3.lab(hue(p.name));
+  console.log(d.value - d.depth)
+  c.l = luminance(d.value - d.depth);
+  return c;
+}
+
+
+
+
+
+
 function processTree(root){
     var tree = root;
     console.log("#####################################");
