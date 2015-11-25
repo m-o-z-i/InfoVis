@@ -69,32 +69,8 @@ tooltip.append('div')
 // load and process data
 d3.json("asyl.json", function(error, data) {
     if (error) throw error;
-
     partition(data);
-
-    var sum = 0; 
-    partition.nodes(data)
-        .forEach(function(d) {
-            if (d.depth === 4) {
-                sum+=d.size;
-            };
-        });
-    console.dir("SUM: " + sum);
-
-
-
-    console.dir("first input data: ");
-    console.dir(data);
-    console.dir("#####################################");
-
     var newData = transformTree(data);
-    //var newData = data;
-
-    console.dir("#####################################");
-    console.dir("transformed data:  ");
-    console.dir(newData);
-    console.dir("#####################################");
-
     draw(newData)
 });
 
@@ -209,22 +185,13 @@ function transformTree(d){
     var depth1 = 2,
         depth2 = 3;
 
-    console.dir("size of old data  " + countSize(data));
-
-    //resetData(data);
-
     // get all parent nodes (tree's) from depth1
     var inputTrees = getNodes(data, depth1-1);
-    console.dir("length of input tree'S  " + Object.keys(inputTrees).length);
 
     // process each under tree
     for (i in inputTrees){
         processTree(inputTrees[i]);
     }
-
-    console.dir("DELEEEETE");
-    //resetData(data);
-    console.dir("size of new data  " + countSize(data));
 
     return data;
 }
@@ -250,7 +217,6 @@ function fill(d) {
   return c;
 }
 
-
 function replacer(key, value) {
     if (key === "parent" || key === "dx" || key === "x" ||key === "y" || key === "dy" || key === "depth" || key === "shortName") {
         return undefined;
@@ -259,8 +225,6 @@ function replacer(key, value) {
 }
 
 function processTree(d){
-    console.dir("##############################################################");
-    console.dir("*************  input tree:  " + d.name + " ****************");
     
     // clone tree data
     var tree = JSON.parse(JSON.stringify(d, replacer));
@@ -268,27 +232,20 @@ function processTree(d){
     // get new childrens
     var newChilds = [];
     for (i in tree.children[0].children){
-        console.dir("new child: "+ tree.children[0].children[i].name);
         newChilds.push(tree.children[0].children[i]);
     }
 
     // define "under tree" for each new child  
     var underTreeObjects = []
     for (t in newChilds){
-        var underTreeObject = newChilds[t];
-        console.dir("++++++++++++++   define underTreeObject:   " + underTreeObject.name + "   ++++++++++");
-        console.dir(JSON.parse(JSON.stringify(underTreeObject, replacer)));
-        console.dir("-------------------------------------------------------")
-        
+        var underTreeObject = newChilds[t];      
         
         // use original tree because stree structure is allready incomplete...
         var oldTree = JSON.parse(JSON.stringify(d, replacer));
-        console.dir(oldTree)
 
         // get old childs 
         var oldChilds = [];
         for (i in oldTree.children){
-            console.dir("old child: "+ oldTree.children[i].name);
             oldChilds.push(tree.children[i]);
         }
 
@@ -298,52 +255,24 @@ function processTree(d){
         var childChildObjects = [];
         for (oc in oldChilds){
             var childObject = oldChilds[oc];
-            console.dir("++++++++++++++   define childObject:   " + childObject.name + "   ++++++++++");
-            console.dir(JSON.parse(JSON.stringify(childObject, replacer)));
 
             // find corresponding child child
             for (cc in childObject.children){
                 var childChildObject = childObject.children[cc];
-                console.dir("find right childs for " + childObject.name);
 
-
-                if (underTreeObject.name === childChildObject.name){
-                    console.dir(underTreeObject.name + " === " + childChildObject.name);
-                    
+                if (underTreeObject.name === childChildObject.name){    
                     childObject['children'] = childChildObject.children;
-                    console.log("right childObject " +childObject.name)
-                    console.dir(JSON.parse(JSON.stringify(childObject, replacer)));
-
-                    console.log("#####  break  - check next  childObject ####")
                     childObjects.push(childObject);
                     break;
                 }
             }
-
-            console.dir("................................................................");
         }
 
-        console.dir("childObjects:... should be syrien and afghanistan with right children");
-        console.dir(JSON.parse(JSON.stringify(childObjects, replacer)));
-        
-        console.dir("underTreeObject:... should be first male and than female with right children");
-        underTreeObject['children'] = childObjects;
-
-        console.dir(JSON.parse(JSON.stringify(underTreeObject, replacer)));
-        console.dir("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-        
+        underTreeObject['children'] = childObjects;        
         underTreeObjects.push(underTreeObject);
     }
 
-
-    console.dir("underTreeObjects:  ");
-    console.dir(underTreeObjects);
-
     tree['children'] = underTreeObjects;
-
-    console.dir("FINAL TREE :  ");
-    console.dir(tree);
-    console.dir("#####################################");
 }
 
 function getNodes(root, depth){
