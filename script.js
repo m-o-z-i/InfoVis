@@ -70,26 +70,32 @@ tooltip.append('div')
 d3.json("asyl.json", function(error, data) {
     if (error) throw error;
 
+    partition(data);
+
+    var sum = 0; 
     partition.nodes(data)
         .forEach(function(d) {
-            d.fill = fill(d);
+            if (d.depth === 4) {
+                sum+=d.size;
+            };
         });
+    console.dir("SUM: " + sum);
 
 
-/*    partition(data);
-    console.log("first input data: ");
-    console.log(data);
-    console.log("#####################################");
+
+    console.dir("first input data: ");
+    console.dir(data);
+    console.dir("#####################################");
 
     var newData = transformTree(data);
     //var newData = data;
 
-    console.log("#####################################");
-    console.log("transformed data:  ");
-    console.log(newData);
-    console.log("#####################################");*/
+    console.dir("#####################################");
+    console.dir("transformed data:  ");
+    console.dir(newData);
+    console.dir("#####################################");
 
-    draw(data)
+    draw(newData)
 });
 
 
@@ -108,20 +114,13 @@ function draw(data)
         .attr('class', function(d) { return "slice-" + d.depth; })
         .attr("id", function(d, i) { return "path-" + i; })
         .attr("d", arc)
-        /*.attr("fill", function(d) { 
-            if (d.depth > 0){
-                return color(d.parent.name);
-            } else {
-                return color(d.name); 
-            }
-        })*/
         .style("fill", function(d) { return fill(d); })
-        //.style("fill-opacity", function(d) { return d.depth === 2 - (data === d) ? 1 : 0; })
-        //.style("fill-opacity", function(d) { return d.depth === 1 + (data === d) ? 1 : 0; })
         .attr("fill-rule", "evenodd")
         .attr('display', function(d, i) {if(i==0) return "none";});
 
     //slice.on('click', transformTree);
+    
+
     // get total size
     var totalSize = data.value;
 
@@ -177,130 +176,174 @@ function draw(data)
 
 }
 
-function transformTree(data){
+function transformTree(d){
+    var root = d;
+    while (root.parent) root = root.parent;
+
+    /***********************************  old structure  ******************************** 
+    /*
+    /*                                          root
+    /*                              -----------/    \--------
+    /*                    oldChild1                          oldChild2
+    /*                   |         |                        |         |
+    /*          newChild1           newChild2       newChild1         newChild2
+    /*          |       |           |       |       |       |         |       |
+    /*          c1     c2           c3     c4       c5     c6         c7     c8
+    /*
+    *************************************************************************************/
+
+    /***********************************  new structure  ******************************** 
+    /*
+    /*                                          root
+    /*                              -----------/    \--------
+    /*                    newChild1                          newChild2
+    /*                   |         |                        |         |
+    /*          oldChild1           oldChild2       oldChild1         oldChild2
+    /*          |       |           |       |       |       |         |       |
+    /*          c1     c2           c3     c4       c5     c6         c7     c8
+    /*
+    *************************************************************************************/
+
+    var data = root;
+
     var depth1 = 2,
         depth2 = 3;
 
-    console.log("size of old data  " + countSize(data));
+    console.dir("size of old data  " + countSize(data));
 
-    var newData = data;
-    //var newData = jQuery.extend(true, {}, data);
+    //resetData(data);
 
-    // get all root nodes (tree's) depth -1
-    var inputTrees = getNodes(newData, depth1-1);
-    console.log("length of input tree'S  " + Object.keys(inputTrees).length);
+    // get all parent nodes (tree's) from depth1
+    var inputTrees = getNodes(data, depth1-1);
+    console.dir("length of input tree'S  " + Object.keys(inputTrees).length);
 
     // process each under tree
     for (i in inputTrees){
         processTree(inputTrees[i]);
     }
 
-    console.log("DELEEEETE");
-    resetData(newData);
+    console.dir("DELEEEETE");
+    //resetData(data);
+    console.dir("size of new data  " + countSize(data));
 
-    return newData;
+    return data;
 }
+
 
 function highlight(d){
     var ring = d3.selectAll('.slice-'+d.depth)
         .attr('class', "path-active");
 }
 
+
 function unhighlight(d){
     var ring = d3.selectAll('.path-active')
         .attr('class', function(d) { return "slice-" + d.depth; });
 }
 
+
 function fill(d) {
   var p = d;
   while (p.depth > 1) p = p.parent;
   var c = d3.lab(hue(p.name));
-  console.log(d.value - d.depth)
   c.l = luminance(d.value - d.depth);
   return c;
 }
 
 
+function replacer(key, value) {
+    if (key === "parent" || key === "dx" || key === "x" ||key === "y" || key === "dy" || key === "depth" || key === "shortName") {
+        return undefined;
+    }
+    return value;
+}
 
-
-
-
-function processTree(root){
-    var tree = root;
-    console.log("#####################################");
-    console.log("input tree: ");
-    console.log(tree);
+function processTree(d){
+    console.dir("##############################################################");
+    console.dir("*************  input tree:  " + d.name + " ****************");
     
-    // get new childrens and replace
+    // clone tree data
+    var tree = JSON.parse(JSON.stringify(d, replacer));
+
+    // get new childrens
     var newChilds = [];
-    console.log("new childs: ");
     for (i in tree.children[0].children){
-        console.log(tree.children[0].children[i]);
+        console.dir("new child: "+ tree.children[0].children[i].name);
         newChilds.push(tree.children[0].children[i]);
     }
 
-    var oldChilds = [];
-    console.log("old childs: ");
-    for (i in tree.children){
-        console.log(tree.children[i]);
-        oldChilds.push(tree.children[i]);
-        //tree.children[i] = [];
-    }
-
-    // find new under tree
-    var combinedUnderTree = []
+    // define "under tree" for each new child  
+    var underTreeObjects = []
     for (t in newChilds){
-        var underTree = newChilds[t];
-        console.log("+++++++ underTree: +++++++++");
-        console.log(underTree);
+        var underTreeObject = newChilds[t];
+        console.dir("++++++++++++++   define underTreeObject:   " + underTreeObject.name + "   ++++++++++");
+        console.dir(JSON.parse(JSON.stringify(underTreeObject, replacer)));
+        console.dir("-------------------------------------------------------")
+        
+        
+        // use original tree because stree structure is allready incomplete...
+        var oldTree = JSON.parse(JSON.stringify(d, replacer));
+        console.dir(oldTree)
 
-        var childArray = [];
-        var index = 0;
+        // get old childs 
+        var oldChilds = [];
+        for (i in oldTree.children){
+            console.dir("old child: "+ oldTree.children[i].name);
+            oldChilds.push(tree.children[i]);
+        }
+
+        // find right child for each old child
+        var childIndex = 0;
+        var childObjects = []
+        var childChildObjects = [];
         for (oc in oldChilds){
-            var oldChild = oldChilds[oc];
-            console.log("push into childArray :  " + oldChild.name);
-            childArray.push(oldChild);
+            var childObject = oldChilds[oc];
+            console.dir("++++++++++++++   define childObject:   " + childObject.name + "   ++++++++++");
+            console.dir(JSON.parse(JSON.stringify(childObject, replacer)));
 
             // find corresponding child child
-            for (cc in oldChild.children){
-                var childChild = oldChild.children[cc];
+            for (cc in childObject.children){
+                var childChildObject = childObject.children[cc];
+                console.dir("find right childs for " + childObject.name);
 
-                console.log(underTree.name + " === " + childChild.name);
-                if (underTree.name === childChild.name){
-                    var childChildArray = [];
 
-                    for (c in childChild.children){
-                        var childChildChild = childChild.children[c]
+                if (underTreeObject.name === childChildObject.name){
+                    console.dir(underTreeObject.name + " === " + childChildObject.name);
+                    
+                    childObject['children'] = childChildObject.children;
+                    console.log("right childObject " +childObject.name)
+                    console.dir(JSON.parse(JSON.stringify(childObject, replacer)));
 
-                        console.log("push into childChildArray :  " + childChildChild.name);
-                        childChildArray.push(childChildChild);
-                    }
-                    console.log("childchildArray:  ");
-                    console.log(childChildArray);
-                    childArray[index]['children'] = childChildArray;
+                    console.log("#####  break  - check next  childObject ####")
+                    childObjects.push(childObject);
                     break;
                 }
             }
-            ++index;
+
+            console.dir("................................................................");
         }
-        console.log("childArray:  ");
-        console.log(childArray);
 
-        underTree['children'] = childArray;
-        console.log("underTree:  ");
-        console.log(underTree);
-        console.log("++++++++++++++++++++++++++++");
+        console.dir("childObjects:... should be syrien and afghanistan with right children");
+        console.dir(JSON.parse(JSON.stringify(childObjects, replacer)));
+        
+        console.dir("underTreeObject:... should be first male and than female with right children");
+        underTreeObject['children'] = childObjects;
 
-        combinedUnderTree.push(underTree);
+        console.dir(JSON.parse(JSON.stringify(underTreeObject, replacer)));
+        console.dir("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        
+        underTreeObjects.push(underTreeObject);
     }
 
-    console.log("combinedUnderTree:  ");
-    console.log(combinedUnderTree);
-    tree['children'] = combinedUnderTree;
 
-    console.log("FINAL TREE :  ");
-    console.log(tree);
-    console.log("#####################################");
+    console.dir("underTreeObjects:  ");
+    console.dir(underTreeObjects);
+
+    tree['children'] = underTreeObjects;
+
+    console.dir("FINAL TREE :  ");
+    console.dir(tree);
+    console.dir("#####################################");
 }
 
 function getNodes(root, depth){
@@ -320,34 +363,26 @@ function getNodes(root, depth){
 }
 
 function resetData(root) {
-    if (root.depth === 0){
-        console.log(root);
-        delete root['value'];
-        delete root['size'];
-        delete root['depth'];
-    }
-    for (i in root.children){
-        var currentNode = root.children[i];
-        if(currentNode.children){
-            console.log(currentNode);
-            delete currentNode['value'];
-            delete currentNode['size'];
-            delete currentNode['depth'];
-        }
-        resetData(currentNode);
-    }
+    var sum = 0;
+    partition.nodes(root)
+        .forEach(function(d) {
+            d.value = 0;
+            d.depth = 0;
+            delete d['value'];
+            delete d['depth'];
+            if (!d.children) {
+                console.dir(d.parent.parent.parent.name + " --> " + d.parent.parent.name + " --> " + d.parent.name + " --> " + d.name +  "  size: " + d.size)
+                sum+=d.size;
+            };
+        });
+    partition(root);
 }
 
 function countSize(root) {
-    var size = 0;
-    for (i in root.children){
-        var currentNode = root.children[i];
-        if(currentNode.size){
-            size += currentNode.size
-        }
-        size += countSize(currentNode, size);
-    }
-    return size;
+    var sum = 0;
+    partition.nodes(root)
+        .forEach(function(d) { if (d.size) { sum+=d.size;  } });
+    return sum;
 }
 
 
@@ -356,11 +391,11 @@ function pruneDepth(root, depth) {
     var removed = false;
     for (i in root.children){
         var currentNode = root.children[i];
-        console.log("check: " + currentNode.name + " (depth: " + currentNode.depth + ")");
+        console.dir("check: " + currentNode.name + " (depth: " + currentNode.depth + ")");
 
         if (currentNode.depth >= depth) {
             // "delete" current Node 
-            console.log("delete: " + i + " child of " + currentNode.parent.name + " (depth: " + currentNode.parent.depth + ") --> " + currentNode.parent.children[i].name + " (depth: " + currentNode.parent.children[i].depth + ")");
+            console.dir("delete: " + i + " child of " + currentNode.parent.name + " (depth: " + currentNode.parent.depth + ") --> " + currentNode.parent.children[i].name + " (depth: " + currentNode.parent.children[i].depth + ")");
             
             var temp = currentNode;
             //currentNode.parent.size  = countSize(temp.parent);
