@@ -105,7 +105,7 @@ function draw(data)
       .append("svg:g");
 
     var slice = groupes.append("svg:path")
-        .attr('class', "slice")
+        .attr('class', function(d) { return "slice-" + d.depth; })
         .attr("id", function(d, i) { return "path-" + i; })
         .attr("d", arc)
         /*.attr("fill", function(d) { 
@@ -126,6 +126,8 @@ function draw(data)
     var totalSize = data.value;
 
     slice.on('mouseenter', function(d) {
+        highlight(d);
+
         var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.value ;
 
         var percent = Math.round(1000 * d.value / totalSize) / 10;
@@ -142,6 +144,7 @@ function draw(data)
     });
 
     slice.on('mouseleave', function(d) {
+        unhighlight(d);
         tooltip.style('display', 'none');
     });
     // ***************************************************************************** //
@@ -196,6 +199,16 @@ function transformTree(data){
     resetData(newData);
 
     return newData;
+}
+
+function highlight(d){
+    var ring = d3.selectAll('.slice-'+d.depth)
+        .attr('class', "path-active");
+}
+
+function unhighlight(d){
+    var ring = d3.selectAll('.path-active')
+        .attr('class', function(d) { return "slice-" + d.depth; });
 }
 
 function fill(d) {
