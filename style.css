@@ -6,7 +6,7 @@
 }
 
 path {
-  fill: grey;
+  /*fill: grey;*/
   stroke: #fff;
   stroke-width: 5;
   fill-rule: evenodd;
@@ -34,7 +34,6 @@ path:hover {
 .label {
   color: black;
   font-size: 12px;
-  text-align: center;
-  text-anchor: middle;
+  text-anchor: left;
 }
 

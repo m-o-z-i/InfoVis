@@ -13,18 +13,31 @@ var arcLength = d3.scale.linear().range([0, 2 * Math.PI]);
 var arcDistance = d3.scale.linear().range([0, radius]);
 
 var duration = 1000;
+var padding = 10;
 
 // define partition size
-var partition = d3.layout.partition()
+/*var partition = d3.layout.partition()
     //.sort(null);
-    .value(function(d) { return d.size; });
+    .value(function(d) { return d.size; });*/
 
 // init arc donut ring
-var arc = d3.svg.arc()
+/*var arc = d3.svg.arc()
     .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, arcLength(d.x))); })
     .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, arcLength(d.x + d.dx))); })
     .innerRadius(function(d) { return Math.max(0, arcDistance(d.y)); })
-    .outerRadius(function(d) { return Math.max(0, arcDistance(d.y + d.dy)); });
+    .outerRadius(function(d) { return Math.max(0, arcDistance(d.y + d.dy)); });*/
+
+var partition = d3.layout.partition()
+    .sort(null)
+    .size([2 * Math.PI, radius * 1])
+    //.children(function(d) { return isNaN(d.value) ? d3.entries(d.size) : null; })
+    .value(function(d) { return d.size; });
+
+var arc = d3.svg.arc()
+    .startAngle(function(d) { return d.x; })
+    .endAngle(function(d) { return d.x + d.dx; })
+    .innerRadius(function(d) { return (d.y); })
+    .outerRadius(function(d) { return (d.y + d.dy);});
 
 // define svg element, that is locatet in the middle of diagram
 var svg = d3.select('#chart')
@@ -72,8 +85,6 @@ function draw(data)
 {
     // *********************    tooltip / infobox   ******************************** //
     var tooltip = d3.select('.tooltip')
-    var totalSize = data.value;
-
 
     // ********************     pie slices      ************************************** //
     var groupes = svg.selectAll("g")
@@ -85,9 +96,19 @@ function draw(data)
         .attr('class', "slice")
         .attr("id", function(d, i) { return "path-" + i; })
         .attr("d", arc)
+        .attr("fill", function(d) { 
+            if (d.depth > 0){
+                return color(d.parent.name);
+            } else {
+                return color(d.name); 
+            }
+        })
+        .attr("fill-rule", "evenodd")
         .attr('display', function(d, i) {if(i==0) return "none";});
 
     //slice.on('click', transformTree);
+    // get total size
+    var totalSize = data.value;
 
     slice.on('mouseenter', function(d) {
         var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.value ;
@@ -117,14 +138,15 @@ function draw(data)
             if (i == 0) return "title";
             else return "label";
         })
-        .attr("pointer-events", "none")
-        .attr("dy", ".35em")
         .attr("id", function(d, i) { return "label-" + i; })
         .attr("display", function(d, i) { if (d.value ==  0) return "none";})
-
+        .attr("pointer-events", "none")
+        .attr("text-anchor", function(d) {
+        return (d.x + d.dx / 2) > Math.PI ? "end" : "start";
+        })
         .attr("transform", function(d, i) { 
-            if (i != 0) { return "translate(" + arc.centroid(d) + ")"
-                 /*"rotate(" + (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 + ")"*/; 
+            var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
+            if (i != 0) { return "rotate(" + angle + ")translate(" + (d.y+padding) + ")rotate(" + (angle > 90 ? -180 : 0) + ")";
         }})
         .text(function(d) { return d.name; });
 
