@@ -156,42 +156,48 @@ function transformTree(d){
     var root = d;
     while (root.parent) root = root.parent;
 
-    /***********************************  old structure  ******************************** 
-    /*
-    /*                                          root
-    /*                              -----------/    \--------
-    /*                    oldChild1                          oldChild2
-    /*                   |         |                        |         |
-    /*          newChild1           newChild2       newChild1         newChild2
-    /*          |       |           |       |       |       |         |       |
-    /*          c1     c2           c3     c4       c5     c6         c7     c8
-    /*
-    *************************************************************************************/
-
-    /***********************************  new structure  ******************************** 
-    /*
-    /*                                          root
-    /*                              -----------/    \--------
-    /*                    newChild1                          newChild2
-    /*                   |         |                        |         |
-    /*          oldChild1           oldChild2       oldChild1         oldChild2
-    /*          |       |           |       |       |       |         |       |
-    /*          c1     c2           c3     c4       c5     c6         c7     c8
-    /*
-    *************************************************************************************/
-
     var data = root;
 
-    var depth1 = 2,
-        depth2 = 3;
+    var depth1 = 3,
+        depth2 = 4;
 
     // get all parent nodes (tree's) from depth1
     var inputTrees = getNodes(data, depth1-1);
+    //console.log(JSON.parse(JSON.stringify(inputTrees, replacer)));
+    if (inputTrees.length < 1 || !inputTrees[0].children) return data;
 
     // process each under tree
+    var underTrees = []
     for (i in inputTrees){
-        processTree(inputTrees[i]);
+        underTrees[i] = processTree(inputTrees[i]);
     }
+
+    if (depth1 > 2) {
+        for (i in underTrees){
+            var underTree = underTrees[i];
+            // find root:
+            for (x in data.children){
+                var currentNode = data.children[x];
+                if(currentNode.name == underTree.parent){
+                    for (y in currentNode.children){
+                        var currentChild = currentNode.children[y];
+                        if (currentChild.name == underTree.name){
+                            currentNode.children[y] = underTree;
+                        }
+                    }
+                }
+            }
+        }
+    }else {
+        if(underTrees.length > 1){
+            data['children'] = underTrees;
+        } else if (underTrees.length === 1) {
+            data = underTrees[0];
+        }
+    }
+
+
+
 
     return data;
 }
@@ -218,16 +224,46 @@ function fill(d) {
 }
 
 function replacer(key, value) {
-    if (key === "parent" || key === "dx" || key === "x" ||key === "y" || key === "dy" || key === "depth" || key === "shortName") {
+    if( key === "parent" || key === "dx" || key === "x" ||key === "y" || key === "dy" || key === "depth" || key === "shortName") {
         return undefined;
     }
     return value;
 }
 
 function processTree(d){
+
+        /***********************************  old structure  ******************************** 
+    /*
+    /*                                          root
+    /*                              -----------/    \--------
+    /*                    oldChild1                          oldChild2
+    /*                   |         |                        |         |
+    /*          newChild1           newChild2       newChild1         newChild2
+    /*          |       |           |       |       |       |         |       |
+    /*          c1     c2           c3     c4       c5     c6         c7     c8
+    /*
+    *************************************************************************************/
+
+    /***********************************  new structure  ******************************** 
+    /*
+    /*                                          root
+    /*                              -----------/    \--------
+    /*                    newChild1                          newChild2
+    /*                   |         |                        |         |
+    /*          oldChild1           oldChild2       oldChild1         oldChild2
+    /*          |       |           |       |       |       |         |       |
+    /*          c1     c2           c3     c4       c5     c6         c7     c8
+    /*
+    *************************************************************************************/
     
     // clone tree data
     var tree = JSON.parse(JSON.stringify(d, replacer));
+    if(d.parent){
+        tree['parent']=d.parent.name;        
+    }
+
+    //console.log("***************** input tree: " + tree.name + "************************");
+    //console.log(JSON.parse(JSON.stringify(tree, replacer)));
 
     // get new childrens
     var newChilds = [];
@@ -238,15 +274,20 @@ function processTree(d){
     // define "under tree" for each new child  
     var underTreeObjects = []
     for (t in newChilds){
-        var underTreeObject = newChilds[t];      
+        var underTreeObject = newChilds[t];
+        //console.log("******************  underTreeObject:  "+underTreeObject.name+ " ****************");
+        //console.log(JSON.parse(JSON.stringify(underTreeObject, replacer)));      
         
         // use original tree because stree structure is allready incomplete...
         var oldTree = JSON.parse(JSON.stringify(d, replacer));
+        if(d.parent){
+            oldTree['parent']=d.parent.name;
+        }
 
         // get old childs 
         var oldChilds = [];
         for (i in oldTree.children){
-            oldChilds.push(tree.children[i]);
+            oldChilds.push(oldTree.children[i]);
         }
 
         // find right child for each old child
@@ -255,38 +296,61 @@ function processTree(d){
         var childChildObjects = [];
         for (oc in oldChilds){
             var childObject = oldChilds[oc];
+            //console.log("******************  childObject:  "+childObject.name+ " ****************");
+            //console.log(JSON.parse(JSON.stringify(childObject, replacer)));
 
             // find corresponding child child
             for (cc in childObject.children){
                 var childChildObject = childObject.children[cc];
+                //console.log("******************  childChildObject:  "+childChildObject.name+ " ****************");
+                //console.log(JSON.parse(JSON.stringify(childChildObject, replacer)));
 
                 if (underTreeObject.name === childChildObject.name){    
-                    childObject['children'] = childChildObject.children;
+                    //console.log(underTreeObject.name + " === " + childChildObject.name);
+                    if(childChildObject.children){
+                        childObject['children'] = childChildObject.children;
+                    } else {
+                        // leaf node.. transfer 'size' value
+                        childObject['size'] = childChildObject['size'];
+                        delete childChildObject['size'];
+                        delete underTreeObject['size'];
+                        delete childObject['value'];
+                        delete childObject['children'];
+                    }
+
                     childObjects.push(childObject);
                     break;
                 }
             }
+            //console.log("******************************************************************");
         }
 
         underTreeObject['children'] = childObjects;        
         underTreeObjects.push(underTreeObject);
+
+        //console.log("******************  final underTreeObject:  "+underTreeObject.name+ " ****************");
+        //console.log(JSON.parse(JSON.stringify(underTreeObject, replacer)));
+        //console.log("##############################################################");
     }
 
     tree['children'] = underTreeObjects;
+
+    return tree;
 }
 
 function getNodes(root, depth){
     var nodes = [];
+    if (depth === 0) {
+        nodes.push(root);
+        return nodes;
+    }
 
-    for (i in root.children){
-        var currentNode = root.children[i];
-
-        if (currentNode.depth === depth) {
-            nodes.push(currentNode);
-
-            continue;
+    if (root.depth === depth -1 && root.children){
+        nodes = root.children;
+    } else {
+        for (i in root.children){
+            nodes = nodes.concat(getNodes(root.children[i], depth));
         }
-        nodes.push(getNodes(currentNode, depth));
     }
     return nodes;
 }
@@ -339,14 +403,6 @@ function pruneDepth(root, depth) {
     if (removed) return true;
     else return false;
 }
-
-
-
-
-
-
-
-
 
 function pruneName(root, name) {
     var removed = false;
