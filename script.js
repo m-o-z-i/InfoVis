@@ -70,23 +70,37 @@ tooltip.append('div')
 d3.json("asyl.json", function(error, data) {
     if (error) throw error;
     partition(data);
-    var newData = transformTree(data);
-    draw(newData)
+    //transformTree(data);
+
+    draw(data)
 });
 
 
 function draw(data)
 {
+    partition(data);
+    console.log("draw data");
+    console.log(JSON.parse(JSON.stringify(data, replacer)));
+
+    // remove all
+    var toRemove = svg.selectAll("g")
+        .remove();
+
     // *********************    tooltip / infobox   ******************************** //
     var tooltip = d3.select('.tooltip')
 
     // ********************     pie slices      ************************************** //
-    var groupes = svg.selectAll("g")
-        .data(partition(data))
-        .enter()
-      .append("svg:g");
+    var dataGroup = svg.selectAll("g")
+        .data(partition(data));
 
-    var slice = groupes.append("svg:path")
+    dataGroup.selectAll('path')
+        .attr("d", arc)
+        .attr('class', function(d) { return "slice-" + d.depth; });
+    
+    var newGroupes = dataGroup.enter()
+        .append("svg:g");
+
+    var newSlice = newGroupes.append("svg:path")
         .attr('class', function(d) { return "slice-" + d.depth; })
         .attr("id", function(d, i) { return "path-" + i; })
         .attr("d", arc)
@@ -94,13 +108,14 @@ function draw(data)
         .attr("fill-rule", "evenodd")
         .attr('display', function(d, i) {if(i==0) return "none";});
 
-    //slice.on('click', transformTree);
+    
+    newSlice.on('click', transformTree);
     
 
     // get total size
     var totalSize = data.value;
 
-    slice.on('mouseenter', function(d) {
+    newSlice.on('mouseenter', function(d) {
         highlight(d);
 
         var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.value ;
@@ -113,20 +128,33 @@ function draw(data)
         tooltip.select('.percent-to-parent').html('percent to parent: ' + parentPercent + '%'); 
         tooltip.style('display', 'block');
     });
-    slice.on('mousemove', function(d) {
+    newSlice.on('mousemove', function(d) {
         tooltip.style('left', (d3.event.pageX + 2) + 'px')
                .style('top', (d3.event.pageY + 2) + 'px');
     });
 
-    slice.on('mouseleave', function(d) {
+    newSlice.on('mouseleave', function(d) {
         unhighlight(d);
         tooltip.style('display', 'none');
     });
+
+
+    dataGroup.exit()
+        .remove();
     // ***************************************************************************** //
 
 
     // **************************     label            ***************************** //
-    var text = groupes.append("svg:text")
+    dataGroup.selectAll('.label')
+        .attr("text-anchor", function(d) {
+            return (d.x + d.dx / 2) > Math.PI ? "end" : "start";
+        })
+        .attr("transform", function(d, i) { 
+            var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
+            return "rotate(" + angle + ")translate(" + (d.y+padding) + ")rotate(" + (angle > 90 ? -180 : 0) + ")";
+        });
+
+    var newLabel = newGroupes.append("svg:text")
         .attr('class', function(d, i) {
             if (i == 0) return "title";
             else return "label";
@@ -144,7 +172,7 @@ function draw(data)
         .text(function(d) { return d.name; });
 
     // for root node 
-    text.append("tspan")
+    newLabel.append("tspan")
         .attr("x", 0)
         .attr("dy", "1em")
         .text(function(d, i) { if (i==0) return d.value; });   
@@ -158,8 +186,8 @@ function transformTree(d){
 
     var data = root;
 
-    var depth1 = 3,
-        depth2 = 4;
+    var depth1 = 2,
+        depth2 = 3;
 
     // get all parent nodes (tree's) from depth1
     var inputTrees = getNodes(data, depth1-1);
@@ -197,9 +225,10 @@ function transformTree(d){
     }
 
 
-
-
-    return data;
+    
+    console.log("transformed tree");
+    console.log(JSON.parse(JSON.stringify(data, replacer)));
+    draw(data);
 }
 
 
