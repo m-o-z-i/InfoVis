@@ -1,3 +1,9 @@
+d3.selection.prototype.moveToFront = function() {
+  return this.each(function(){
+    this.parentNode.appendChild(this);
+  });
+};
+
 // visualisation settings
 var vis = {
     width: 800,
@@ -19,6 +25,7 @@ var arcDistance = d3.scale.linear().range([0, radius]);
 
 var duration = 1000;
 var padding = 10;
+var dragging = false;
 
 // define partition size
 /*var partition = d3.layout.partition()
@@ -79,43 +86,94 @@ d3.json("asyl.json", function(error, data) {
 function draw(data)
 {
     partition(data);
-    console.log("draw data");
-    console.log(JSON.parse(JSON.stringify(data, replacer)));
 
     // remove all
     var toRemove = svg.selectAll("g")
         .remove();
+
+    var drag = d3.behavior.drag()
+        .on("drag", function(d,i) {
+            dragging = true;
+            var depth = d.depth;
+
+            d3.selectAll('.slice-'+d.depth)
+                .each(function(d, i) {
+                    var group = d3.select(d)
+                    console.log(group)
+                    //d3.select(group).moveToFront();
+                })
+                .attr('transform',  function(d,i){
+                    d.dx += d3.event.dx;
+                    d.dy += d3.event.dy;
+                    return "translate(" + [ d.dx, d.dy ] + ")";
+            })
+        })
+        .on("dragend", function(d,i) {
+            console.log("dragend");
+            dragging = false;
+        });
+
 
     // *********************    tooltip / infobox   ******************************** //
     var tooltip = d3.select('.tooltip')
 
     // ********************     pie slices      ************************************** //
     var dataGroup = svg.selectAll("g")
-        .data(partition(data));
+        .data(partition(data), function(d, i) { return i; });
+
+    console.log("pos") 
 
     dataGroup.selectAll('path')
         .attr("d", arc)
         .attr('class', function(d) { return "slice-" + d.depth; });
     
     var newGroupes = dataGroup.enter()
-        .append("svg:g");
+        .append("svg:g")
+        .attr('class', function(d) { return "group"; });
 
     var newSlice = newGroupes.append("svg:path")
         .attr('class', function(d) { return "slice-" + d.depth; })
+        .attr('depth', function(d) { return d.depth; })
         .attr("id", function(d, i) { return "path-" + i; })
         .attr("d", arc)
         .style("fill", function(d) { return fill(d); })
         .attr("fill-rule", "evenodd")
-        .attr('display', function(d, i) {if(i==0) return "none";});
+        .attr('display', function(d, i) {if(i==0) return "none";})
+        .call(drag);
+        
 
     
-    newSlice.on('click', transformTree);
+
+/*    var dragElements;
+
+    newSlice.on('dragstart', function(d) {
+        //d3.event.sourceEvent.stopPropagation(); // silence other listeners
+        dragElements = d3.selectAll('.slice-'+d.depth)
+            .attr('class', "path-active");
+        console.log("dragstart  "+d.depth);
+    });
+
+    newSlice.on('drag', function(d) {
+        d3.select(this).attr("cx", +d3.select(this).attr("cx") + d3.event.dx);
+        console.log("drag" + d3.event.dx);
+    });
+
+    newSlice.on('dragend', function(d) {
+        dragElements = d3.selectAll('.path-active')
+            .attr('class', function(d) { return "slice-" + d.depth; });
+        console.log("dragend");
+    });
     
+    newSlice.on('click', function(d) {
+        if (d3.event.defaultPrevented) return; // click suppressed
+        transformTree(d);
+    });*/
 
     // get total size
     var totalSize = data.value;
 
     newSlice.on('mouseenter', function(d) {
+        if (dragging) return;
         highlight(d);
 
         var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.value ;
@@ -446,3 +504,5 @@ function pruneName(root, name) {
     if (removed) return true;
     else return false;
 }
+
+

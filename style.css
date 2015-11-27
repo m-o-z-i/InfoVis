@@ -6,7 +6,6 @@
 }
 
 path {
-  /*fill: grey;*/
   stroke: #fff;
   stroke-width: 5;
   fill-rule: evenodd;
@@ -39,8 +38,25 @@ path:hover {
 }
 
 .label {
+  pointer-events: none;
   color: black;
   font-size: 12px;
   text-anchor: left;
 }
 
+text {
+  pointer-events: none;
+}
+
+
+*::selection {
+    background:transparent;
+}
+
+*::-moz-selection {
+    background:transparent;
+}
+
+*::-webkit-selection {
+    background:transparent;
+}
