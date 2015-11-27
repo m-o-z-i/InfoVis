@@ -7,9 +7,7 @@ d3.selection.prototype.moveToFront = function() {
 // visualisation settings
 var vis = {
     width: 800,
-    height: 800,
-    
-    donutWidth: 75
+    height: 800
 }
 
 //var color = d3.scale.category20c();
@@ -28,8 +26,8 @@ var padding = 10;
 var dragging = false;
 
 var partition = d3.layout.partition()
-    .sort(null)
-    .size([2 * Math.PI, radius * 1])
+    //.sort(null)
+    .size([2 * Math.PI, radius])
     //.children(function(d) { return isNaN(d.value) ? d3.entries(d.size) : null; })
     .value(function(d) { return d.size; });
 
@@ -70,43 +68,87 @@ d3.json("asyl.json", function(error, data) {
     draw(data)
 });
 
+function length(x, y){
+    return Math.sqrt(x*x + y*y);
+}
 
-
+function rad2deg(angle) {
+    // (angle / 180) * Math.PI;
+    return angle * (180 /  Math.PI);
+}
 
 function draw(data)
 {
     // ******************************* drag event ****************************** //
     var drag = d3.behavior.drag()
         .on("drag", function(d,i) {
+            console.log("dragstart");
+            //console.log(d3.event.dx + "   " + d3.event.dy);
             dragging = true;
             var depth = d.depth;
 
+            // mouse input direction (normalized)
+            var scaleFactor= length(d3.event.dx, d3.event.dy);
+            var mouseDirection = [d3.event.dx/scaleFactor, d3.event.dy/scaleFactor];
+            //console.log("length scaleFactor:   " + scaleFactor);
+            //console.log("length direction:   " + length(scaleFactor[0], scaleFactor[1]));
+
+            // determine normalized direction vec
+            var localDirection = arc.centroid(d)
+            var l = length(localDirection[0], localDirection[1])
+            localDirection = [localDirection[0]/l, localDirection[1]/l];
+
+            // compute angle between local and mouse direction --> [if 0 --> decrease scale, if 180 --> decrease scale]
+            var dot = mouseDirection[0]*localDirection[0] + mouseDirection[1]*localDirection[1]
+            var angle = Math.acos(dot)
+            angle = rad2deg(angle)
+
+            // compute scala factor
+            var scaleFactor = scaleFactor * 0.001
+
+            if (angle > 90){
+                scaleFactor = -scaleFactor;
+            } 
+            
+            console.log("localDirection:  " + localDirection + "  global direction  " + mouseDirection + "  dot: " +dot +"  angle; " + angle);
+
             var group = d3.selectAll('.group')
-                .each(function() {
+                .each(function(d) {
                     var parentG = d3.select(this)
                     var path = parentG.select('path');
                     //console.log(path.attr('depth') + "    " + depth + "  " + (depth === path.attr('depth')));
                     if(depth == path.attr('depth')){
+                        // move group to front
                         parentG.moveToFront();
+                        
+                        // get old scale factor
+                        var currentScale = parseFloat(parentG.attr('scale'));
+                        //console.log("currentScale: " + currentScale);
+                        
+                        // compute new scale from scaleFactor
+                        var newScale = currentScale + scaleFactor;
+                        //console.log("newScale: " + newScale);
 
-                        /*
+
+                        
+
+                        parentG.attr('scale', newScale);
+                        //console.log("scale: "+ parentG.attr('scale'));
                         parentG.attr('transform',  function(d,i){
-                            d.dx += d3.event.dx;
-                            d.dy += d3.event.dy;
 
                             //var x = path[0][0].__data__.dx + d3.event.dx;
                             //var y = path[0][0].__data__.dy + d3.event.dy;
-                            return "translate(" + [ d.dx, d.dy ] + ")";
-                        });*/
+                            return "scale(" + (newScale)  + ")";
+                        });
                     }
             })
 
-            d3.selectAll('.slice-'+d.depth)
+/*            d3.selectAll('.slice-'+d.depth)
                 .attr('transform',  function(d,i){
                     d.dx += d3.event.dx;
                     d.dy += d3.event.dy;
                     return "translate(" + [ d.dx, d.dy ] + ")";
-            });
+            });*/
 
 /*            d3.selectAll('.label-'+d.depth)
                 .attr("transform", function(d, i) { 
@@ -136,13 +178,12 @@ function draw(data)
     var dataGroup = svg.selectAll("g")
         .data(partition(data), function(d, i) { return i; });
 
-    console.log("pos") 
-
     dataGroup.selectAll('path')
         .attr("d", arc);
     
     var newGroupes = dataGroup.enter()
         .append("svg:g")
+        .attr('scale', 1)
         .attr('class', function(d) { return "group"; });
 
     var newSlice = newGroupes.append("svg:path")
@@ -164,7 +205,10 @@ function draw(data)
     var totalSize = data.value;
 
     newSlice.on('mouseenter', function(d) {
-        if (dragging) return;
+        if (dragging) {
+            tooltip.style('display', 'none');
+            return
+        }
         highlight(d);
 
         var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.value ;
@@ -178,13 +222,20 @@ function draw(data)
         tooltip.style('display', 'block');
     });
     newSlice.on('mousemove', function(d) {
+        if (dragging) {
+            tooltip.style('display', 'none');
+            return
+        }
         tooltip.style('left', (d3.event.pageX + 2) + 'px')
                .style('top', (d3.event.pageY + 2) + 'px');
     });
 
     newSlice.on('mouseleave', function(d) {
+        if (dragging) {
+            tooltip.style('display', 'none');
+            return
+        }
         unhighlight(d);
-        tooltip.style('display', 'none');
     });
 
 
