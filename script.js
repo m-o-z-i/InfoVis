@@ -96,6 +96,26 @@ function draw(data)
             dragging = true;
             var depth = d.depth;
 
+            var group = d3.selectAll('.group')
+                .each(function() {
+                    var parentG = d3.select(this)
+                    var path = parentG.select('path');
+                    //console.log(path.attr('depth') + "    " + depth + "  " + (depth === path.attr('depth')));
+                    if(depth == path.attr('depth')){
+                        parentG.moveToFront();
+
+                        /*
+                        parentG.attr('transform',  function(d,i){
+                            d.dx += d3.event.dx;
+                            d.dy += d3.event.dy;
+
+                            //var x = path[0][0].__data__.dx + d3.event.dx;
+                            //var y = path[0][0].__data__.dy + d3.event.dy;
+                            return "translate(" + [ d.dx, d.dy ] + ")";
+                        });*/
+                    }
+            })
+
             d3.selectAll('.slice-'+d.depth)
                 .each(function(d, i) {
                     var group = d3.select(d)
