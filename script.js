@@ -27,18 +27,6 @@ var duration = 1000;
 var padding = 10;
 var dragging = false;
 
-// define partition size
-/*var partition = d3.layout.partition()
-    //.sort(null);
-    .value(function(d) { return d.size; });*/
-
-// init arc donut ring
-/*var arc = d3.svg.arc()
-    .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, arcLength(d.x))); })
-    .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, arcLength(d.x + d.dx))); })
-    .innerRadius(function(d) { return Math.max(0, arcDistance(d.y)); })
-    .outerRadius(function(d) { return Math.max(0, arcDistance(d.y + d.dy)); });*/
-
 var partition = d3.layout.partition()
     .sort(null)
     .size([2 * Math.PI, radius * 1])
@@ -83,14 +71,11 @@ d3.json("asyl.json", function(error, data) {
 });
 
 
+
+
 function draw(data)
 {
-    partition(data);
-
-    // remove all
-    var toRemove = svg.selectAll("g")
-        .remove();
-
+    // ******************************* drag event ****************************** //
     var drag = d3.behavior.drag()
         .on("drag", function(d,i) {
             dragging = true;
@@ -117,22 +102,32 @@ function draw(data)
             })
 
             d3.selectAll('.slice-'+d.depth)
-                .each(function(d, i) {
-                    var group = d3.select(d)
-                    console.log(group)
-                    //d3.select(group).moveToFront();
-                })
                 .attr('transform',  function(d,i){
                     d.dx += d3.event.dx;
                     d.dy += d3.event.dy;
                     return "translate(" + [ d.dx, d.dy ] + ")";
-            })
+            });
+
+/*            d3.selectAll('.label-'+d.depth)
+                .attr("transform", function(d, i) { 
+                    var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
+                    d.x += d3.event.dx;
+                    d.y += d3.event.dy;
+                    return "translate(" + [d.x,d.y] + ")translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
+                });*/
         })
         .on("dragend", function(d,i) {
             console.log("dragend");
             dragging = false;
         });
+    // ***************************************************************************** //
+    
 
+    partition(data);
+
+    // remove all
+    var toRemove = svg.selectAll("g")
+        .remove();
 
     // *********************    tooltip / infobox   ******************************** //
     var tooltip = d3.select('.tooltip')
@@ -144,8 +139,7 @@ function draw(data)
     console.log("pos") 
 
     dataGroup.selectAll('path')
-        .attr("d", arc)
-        .attr('class', function(d) { return "slice-" + d.depth; });
+        .attr("d", arc);
     
     var newGroupes = dataGroup.enter()
         .append("svg:g")
@@ -160,31 +154,8 @@ function draw(data)
         .attr("fill-rule", "evenodd")
         .attr('display', function(d, i) {if(i==0) return "none";})
         .call(drag);
-        
-
     
-
-/*    var dragElements;
-
-    newSlice.on('dragstart', function(d) {
-        //d3.event.sourceEvent.stopPropagation(); // silence other listeners
-        dragElements = d3.selectAll('.slice-'+d.depth)
-            .attr('class', "path-active");
-        console.log("dragstart  "+d.depth);
-    });
-
-    newSlice.on('drag', function(d) {
-        d3.select(this).attr("cx", +d3.select(this).attr("cx") + d3.event.dx);
-        console.log("drag" + d3.event.dx);
-    });
-
-    newSlice.on('dragend', function(d) {
-        dragElements = d3.selectAll('.path-active')
-            .attr('class', function(d) { return "slice-" + d.depth; });
-        console.log("dragend");
-    });
-    
-    newSlice.on('click', function(d) {
+/*    newSlice.on('click', function(d) {
         if (d3.event.defaultPrevented) return; // click suppressed
         transformTree(d);
     });*/
@@ -224,28 +195,22 @@ function draw(data)
 
     // **************************     label            ***************************** //
     dataGroup.selectAll('.label')
-        .attr("text-anchor", function(d) {
-            return (d.x + d.dx / 2) > Math.PI ? "end" : "start";
-        })
         .attr("transform", function(d, i) { 
             var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
-            return "rotate(" + angle + ")translate(" + (d.y+padding) + ")rotate(" + (angle > 90 ? -180 : 0) + ")";
+            return "translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
         });
 
     var newLabel = newGroupes.append("svg:text")
         .attr('class', function(d, i) {
             if (i == 0) return "title";
-            else return "label";
+            else return "label-" + d.depth;
         })
         .attr("id", function(d, i) { return "label-" + i; })
         .attr("display", function(d, i) { if (d.value ==  0) return "none";})
         .attr("pointer-events", "none")
-        .attr("text-anchor", function(d) {
-        return (d.x + d.dx / 2) > Math.PI ? "end" : "start";
-        })
         .attr("transform", function(d, i) { 
             var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
-            if (i != 0) { return "rotate(" + angle + ")translate(" + (d.y+padding) + ")rotate(" + (angle > 90 ? -180 : 0) + ")";
+            if (i != 0) { return "translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
         }})
         .text(function(d) { return d.name; });
 
@@ -255,7 +220,6 @@ function draw(data)
         .attr("dy", "1em")
         .text(function(d, i) { if (i==0) return d.value; });   
     // ***************************************************************************** //
-
 }
 
 function transformTree(d){
