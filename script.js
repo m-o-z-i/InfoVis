@@ -71,9 +71,9 @@ var svgCircle = d3.select('#Visualisations')
     .attr("transform", "translate(" + circleSetVis.width / 2 + "," + (circleSetVis.height / 2) + ")");
 
 // add tooltip to DOM
-var tooltip = d3.select('#chart')
+var tooltip = d3.select('#Visualisations')
     .append('div')
-    .attr('class', 'tooltip');
+    .attr('class', 'tooltipCircle');
 tooltip.append('div')
     .attr('class', 'label');
 tooltip.append('div')
@@ -262,9 +262,17 @@ function mouseenter(d){
 
     var percent = Math.round(1000 * d.value / totalSize) / 10;
     var parentPercent = Math.round(1000 * d.value / parentSize) / 10;
-    tooltip.select('.label').html('<b>' + d.name + '</b>' );
-    tooltip.select('.count').html('count: ' + d.value); 
-    tooltip.select('.percent').html('total percent: ' + percent + '%'); 
+
+    var p = d;
+    var path = [];
+    while (p.depth > 0){
+        path.unshift(p.name)
+        p = p.parent;
+    }
+        
+    tooltip.select('.label').html('<b>' + path.join(" → ") + '</b>' );
+    tooltip.select('.count').html('count: ' + d.value + (percent)); 
+    //tooltip.select('.percent').html('total percent: ' + percent + '%'); 
     tooltip.select('.percent-to-parent').html('percent to parent: ' + parentPercent + '%'); 
     tooltip.style('display', 'block');
 }
@@ -352,7 +360,7 @@ drag.on("dragstart", function(d,i) {
         // transform slices and labels
         sliceSelection
             .attr('d',  function(d,i){
-                if ((d.y + scaleFactor) > 60 && (d.y + scaleFactor) < radius-40){
+                if ((d.y + scaleFactor) > 30 && (d.y + scaleFactor) < radius-30){
                     d.y += (scaleFactor);
                 }
                 if (d.y < prevInnerR && d.y > 0 && !transformed) {

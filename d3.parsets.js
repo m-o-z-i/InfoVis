@@ -659,11 +659,15 @@
   function defaultTooltip(d) {
     var count = d.count,
         path = [];
+
+    var parentSize = (typeof d.parent == "undefined") ? d.count : d.parent.count ;
+    var parentPercent = Math.round(1000 * d.count / parentSize) / 10;
+
     while (d.parent) {
       if (d.name) path.unshift(d.name);
       d = d.parent;
     }
-    return path.join(" → ") + "<br>" + comma(count) + " (" + percent(count / d.count) + ")";
+    return '<b>' + path.join(" → ") + '</b>' + "<br>" + comma(count) + " (" + percent(count / d.count) + ")" + "<br>" + "percent to parent: " + parentPercent;
   }
 
   function defaultCategoryTooltip(d) {

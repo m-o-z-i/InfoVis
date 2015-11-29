@@ -27,7 +27,14 @@
 .category-9 { fill: #17becf; stroke: #17becf; }
 
 .tooltip {
-  background-color: rgba(242, 242, 242, .6);
-  position: absolute;
+  background-color: rgba(242, 242, 242, .95);
+  pointer-events: none;
+  background: #eee;
+  box-shadow: 0 0 5px #999999;
+  font-size: 12px;
+  left: 130px;
   padding: 5px;
+  position: absolute;
+  text-align: center;
+  top: 95px;
 }
