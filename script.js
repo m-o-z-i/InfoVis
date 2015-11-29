@@ -79,20 +79,36 @@ function rad2deg(angle) {
     return angle * (180 /  Math.PI);
 }
 
+
+var initDragging = false;
+var depthSelection = 0;
+var skipNextScale = false;
 // ******************************* drag event ****************************** //
 var drag = d3.behavior.drag()
     .on("dragstart", function(d,i) {
         //console.log("dragstart");
         dragging = true;
+        initDragging = true;
+
         d3.event.sourceEvent.stopPropagation(); 
     })
     .on("drag", function(d,i) {
         //console.log("drag");
-        var depth = d.depth;
         var transformed = false;
+        
+        if(initDragging){
+            depthSelection = d.depth;
+            initDragging = false;
+        }
+
+        // get mouse direction length ( plus avoid weird mouse bug after transformation...) 
+        var scaleFactor = 1;
+        if (!skipNextScale){
+           scaleFactor = length(d3.event.dx, d3.event.dy);
+        }
+        skipNextScale = false;
 
         // mouse input direction (normalized)
-        var scaleFactor= length(d3.event.dx, d3.event.dy);
         var mouseDirection = [d3.event.dx/scaleFactor, d3.event.dy/scaleFactor];
 
         // determine normalized direction vec
@@ -113,35 +129,44 @@ var drag = d3.behavior.drag()
             .each(function(d) {
                 var parentG = d3.select(this)
                 var path = parentG.select('path');
-                if(depth == path.attr('depth')){
+                if(depthSelection == path.attr('depth')){
                     // move group to front
                     parentG.moveToFront();
                 }
         })
 
         // get innderradius (d.y) from prev and next layer
-        var prevInnerR, nextInnerR, innerRing;
-        d3.select('.slice-' + (depth-1)).each(function(d) {prevInnerR =  d.y;});
-        d3.select('.slice-' + (depth+1)).each(function(d) {nextInnerR =  d.y;})
+        var prevInnerR = 0, 
+            nextInnerR = radius, 
+            innerRing = 0;
 
+        d3.select('.slice-' + (depthSelection-1)).each(function(d) {prevInnerR =  d.y;});
+        d3.select('.slice-' + (depthSelection+1)).each(function(d) {nextInnerR = d.y;})
 
         // transform slices and labels
-        d3.selectAll('.slice-' + depth)
+        //console.log("selection depth: "+ depthSelection + "   prevRing:  " +prevInnerR + "   innerRadius: " + d.y + "    nextRing:  " + nextInnerR); 
+        //console.log("scale factor " + scaleFactor);
+
+        d3.selectAll('.slice-' + depthSelection)
             .attr('d',  function(d,i){
                 d.y += (scaleFactor);
 
-                if (d.y < prevInnerR) {
-                    innerRing = depth-1;
+                if (d.y < prevInnerR && d.y > 0 && !transformed) {
+                    innerRing = depthSelection-1;
+                    //console.log("decrease dept  " + d.y + ", " + prevInnerR + "  transformed: " + transformed)
+                    --depthSelection;
                     transformed = true;
-                } else if (d.y > nextInnerR) {
-                    innerRing = depth;
+                } else if (d.y > nextInnerR && d.y > 0 && !transformed) {
+                    innerRing = depthSelection;
+                    //console.log("increase dept  " + d.y + ", " + nextInnerR + "  transformed: " + transformed)
+                    ++depthSelection;
                     transformed = true;
                 }
 
                 return arc(d);
         });
 
-        d3.selectAll('.label-'+d.depth)
+        d3.selectAll('.label-'+depthSelection)
             .attr("transform", function(d, i) { 
                 var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
                 var x = d3.event.dx;
@@ -149,10 +174,10 @@ var drag = d3.behavior.drag()
                 return "translate(" + [x,y] + ")translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
             });
 
-        console.log("depth "+ depth); 
         if (transformed){
-            console.log("transform:  inner Ring: " + innerRing);
+            //console.log("transform:  inner Ring: " + innerRing);
             data = transformTree(data, innerRing);
+            skipNextScale = true;
             //console.log("draw data : ");
             //console.log(JSON.parse(JSON.stringify(data, replacer)));
             draw(data);
@@ -161,6 +186,7 @@ var drag = d3.behavior.drag()
     .on("dragend", function(d,i) {
         //console.log("dragend");
         dragging = false;
+        draw(data);
     });
 // ***************************************************************************** //
 
