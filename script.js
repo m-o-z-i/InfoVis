@@ -12,10 +12,10 @@ var vis = {
 
 //var color = d3.scale.category20c();
 var hue = d3.scale.ordinal()
-  .domain([0, 10])
-  .range(["#1f77b4", "#ff7f0e" , "#2ca02c", 
-          "#d62728", "#9467bd" , "#8c564b", 
-          "#e377c2", "#7f7f7f" , "#bcbd22", "#17becf"]);
+  .domain([0,1,2,3,4,5,6,7,8,9])
+  .range(["#1f77b4", "#ff7f0e", "#2ca02c", 
+          "#d62728" , "#9467bd", "#8c564b", 
+          "#e377c2" , "#7f7f7f", "#bcbd22", "#17becf"]);
 
 //var hue = d3.scale.category10();
 var saturation = d3.scale.linear()
@@ -312,10 +312,6 @@ drag.on("dragstart", function(d,i) {
 
         sliceSelection = d3.selectAll("[depth=slice"+depthSelection+"]");
         labelSelection = d3.selectAll("[depth=label"+depthSelection+"]");
-
-        console.log(sliceSelection);
-        console.log("depthSelection:  " + depthSelection);
-
     })
     .on("drag", function(d,i) {
 
@@ -358,8 +354,6 @@ drag.on("dragstart", function(d,i) {
                 if ((d.y + scaleFactor) > 60 && (d.y + scaleFactor) < radius-40){
                     d.y += (scaleFactor);
                 }
-
-                console.log("dy " + d.y);
                 if (d.y < prevInnerR && d.y > 0 && !transformed) {
                     innerRing = depthSelection-1;
                     //console.log("decrease dept  " + d.y + ", " + prevInnerR + "  transformed: " + transformed)
@@ -627,11 +621,11 @@ function pruneDepth(root, depth) {
     var removed = false;
     for (i in root.children){
         var currentNode = root.children[i];
-        console.dir("check: " + currentNode.name + " (depth: " + currentNode.depth + ")");
+        //console.dir("check: " + currentNode.name + " (depth: " + currentNode.depth + ")");
 
         if (currentNode.depth >= depth) {
             // "delete" current Node 
-            console.dir("delete: " + i + " child of " + currentNode.parent.name + " (depth: " + currentNode.parent.depth + ") --> " + currentNode.parent.children[i].name + " (depth: " + currentNode.parent.children[i].depth + ")");
+            //console.dir("delete: " + i + " child of " + currentNode.parent.name + " (depth: " + currentNode.parent.depth + ") --> " + currentNode.parent.children[i].name + " (depth: " + currentNode.parent.children[i].depth + ")");
             
             var temp = currentNode;
             //currentNode.parent.size  = countSize(temp.parent);

@@ -26,7 +26,7 @@
             total,
             ribbon;
 
-        console.log(dimensionNames);
+        //console.log(dimensionNames);
 
         d3.select(window).on("mousemove.parsets." + ++parsetsId, unhighlight);
 
@@ -76,7 +76,7 @@
                 node.children[d.name] = d;
               });
           tree = buildTree(tree, data, dimensions.map(dimensionName), value_);
-          console.log(tree);
+          //console.log(tree);
 
           cache = dimensions.map(function(d) {
             var t = {};
@@ -148,12 +148,12 @@
                       ordinal.domain([]).range(d3.range(dimensions[0].categories.length));
 
                       //console.log(dimensions);
-                      console.log(dimensionNames);
+                      //console.log(dimensionNames);
                       
-                      console.log("###############################");
-                      console.log(nodes);
+                      //console.log("###############################");
+                      //console.log(nodes);
                       nodes = layout(tree = buildTree({children: {}, count: 0}, data, dimensionNames, value_), dimensions, ordinal);
-                      console.log(nodes);
+                      //console.log(nodes);
                       total = getTotal(dimensions);
                       g.selectAll(".ribbon, .ribbon-mouse").selectAll("path").remove();
                       updateRibbons();
@@ -619,7 +619,7 @@
   // dimensions.  Similar to d3.nest, except we also set the parent.
   function buildTree(root, data, dimensions, value) {
     zeroCounts(root);
-    console.log(data);
+    //console.log(data);
     var n = data.length,
         nd = dimensions.length;
     for (var i = 0; i < n; i++) {
