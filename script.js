@@ -131,6 +131,7 @@ function draw(data)
     var counter = [0,0,0,0,0,0,0,0,0,0];
     partition.nodes(data).forEach(function(d,i) {
         d.colorID = counter[d.depth];
+        d.id = i;
         ++counter[d.depth];
     });
 
@@ -156,7 +157,7 @@ function draw(data)
     var newSlice = newGroupes.append("svg:path")
         .attr('class', 'slice')
         .attr('depth', function(d) { return "slice"+d.depth; })
-        .attr("id", function(d, i) { return "path-" + i; })
+        .attr("id", function(d, i) { return "slice-" + i; })
         .attr("d", arc)
         .style("fill", function(d) { return fill(d); })
         .attr("fill-rule", "evenodd")
@@ -255,7 +256,7 @@ function mouseenter(d){
     // get total size
     var totalSize = data.value;
 
-    highlight(d);
+    highlight(d, true);
 
     var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.value ;
 
@@ -279,7 +280,7 @@ function mousemove(d){
 
 function mouseleave(d){
     if (dragging) return;
-    unhighlight(d);
+    unhighlight();
     tooltip.style('display', 'none');
 }
 
@@ -423,13 +424,23 @@ drag.on("dragstart", function(d,i) {
 // ############################################################################# //
 
 
-function highlight(d){
+function highlight(d, parents){
     var ring = d3.selectAll("[depth=slice"+d.depth+"]")
         .attr('class', "slice-active");
+
+    if(parents){
+        var parent = d;
+        while(parent.depth > 0) {       
+            d3.select("[id=slice-"+(parent.id)+"]")
+                .attr('class', "slice-active");
+
+            parent=parent.parent
+        }
+    }
 }
 
 
-function unhighlight(d){
+function unhighlight(){
     var ring = d3.selectAll('.slice-active')
         .attr('class', 'slice');
 }
