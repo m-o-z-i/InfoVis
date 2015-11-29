@@ -31,8 +31,8 @@
   fill-rule: evenodd;
 }
 
-
 .tooltip {
+  background-color: rgba(242, 242, 242, .6);
   pointer-events: none;
   background: #eee;
   box-shadow: 0 0 5px #999999;
@@ -40,7 +40,7 @@
   display: none;
   font-size: 12px;
   left: 130px;
-  padding: 10px;
+  padding: 5px;
   position: absolute;
   text-align: center;
   top: 95px;

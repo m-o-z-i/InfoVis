@@ -11,15 +11,21 @@ var vis = {
 }
 
 //var color = d3.scale.category20c();
-var hue = d3.scale.category10();
+var hue = d3.scale.ordinal()
+  .domain([0, 10])
+  .range(["#1f77b4", "#ff7f0e" , "#2ca02c", 
+          "#d62728", "#9467bd" , "#8c564b", 
+          "#e377c2", "#7f7f7f" , "#bcbd22", "#17becf"]);
+
+//var hue = d3.scale.category10();
 var saturation = d3.scale.linear()
     .domain([1, 4])
     .clamp(true)
     .range([1.0, .7]);
 var lightness = d3.scale.linear()
-    .domain([0, 10])
+    .domain([0, 7])
     .clamp(true)
-    .range([0.7, 0.3]);
+    .range([0.7, 0.4]);
 
 
 var radius = Math.min(vis.width, vis.height) / 2;
@@ -30,8 +36,12 @@ var duration = 1000;
 var padding = 10;
 var dragging = false;
 
+function comparator(a, b) {
+  return b.depth < a.depth;
+}
+
 var partition = d3.layout.partition()
-    //.sort(null)
+    .sort(comparator)
     .size([2 * Math.PI, radius])
     //.children(function(d) { return isNaN(d.value) ? d3.entries(d.size) : null; })
     .value(function(d) { return d.size; });
@@ -90,7 +100,12 @@ function draw(data)
 {  
     console.log('draw');
 
-    partition(data);
+    // max depth 10
+    var counter = [0,0,0,0,0,0,0,0,0,0];
+    partition.nodes(data).forEach(function(d,i) {
+        d.colorID = counter[d.depth];
+        ++counter[d.depth];
+    });
 
     // remove all
     var toRemove = svg.selectAll("g")
@@ -403,7 +418,7 @@ function unhighlight(d){
 function fill(d) {
   var p = d;
   while (p.depth > 1) p = p.parent;
-  var c = d3.hsl(hue(p.name));
+  var c = d3.hsl(hue(p.colorID));
   c.s = saturation(d.depth);
   c.l = lightness(d.value);
 
