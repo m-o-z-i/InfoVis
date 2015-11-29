@@ -12,10 +12,15 @@ var vis = {
 
 //var color = d3.scale.category20c();
 var hue = d3.scale.category10();
-var luminance = d3.scale.sqrt()
-    .domain([6, -3])
+var saturation = d3.scale.linear()
+    .domain([1, 4])
     .clamp(true)
-    .range([50, 90]);
+    .range([1.0, .7]);
+var lightness = d3.scale.linear()
+    .domain([0, 10])
+    .clamp(true)
+    .range([0.7, 0.3]);
+
 
 var radius = Math.min(vis.width, vis.height) / 2;
 var arcLength = d3.scale.linear().range([0, 2 * Math.PI]);
@@ -206,7 +211,6 @@ function transformTree(d, innerRing){
 // ################################ mouse events############################### //
 
 function mouseenter(d){
-    if (dragging) return;
     // get total size
     var totalSize = data.value;
 
@@ -399,8 +403,10 @@ function unhighlight(d){
 function fill(d) {
   var p = d;
   while (p.depth > 1) p = p.parent;
-  var c = d3.lab(hue(p.name));
-  c.l = luminance(d.value - d.depth);
+  var c = d3.hsl(hue(p.name));
+  c.s = saturation(d.depth);
+  c.l = lightness(d.value);
+
   return c;
 }
 
