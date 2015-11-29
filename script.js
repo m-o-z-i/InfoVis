@@ -149,7 +149,9 @@ var drag = d3.behavior.drag()
 
         d3.selectAll('.slice-' + depthSelection)
             .attr('d',  function(d,i){
-                d.y += (scaleFactor);
+                if ((d.y + scaleFactor) > 60 && (d.y + scaleFactor) < radius-40){
+                    d.y += (scaleFactor);
+                }
 
                 if (d.y < prevInnerR && d.y > 0 && !transformed) {
                     innerRing = depthSelection-1;
@@ -171,7 +173,12 @@ var drag = d3.behavior.drag()
                 var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
                 var x = d3.event.dx;
                 var y = d3.event.dy;
-                return "translate(" + [x,y] + ")translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
+
+                if ((d.y + scaleFactor) > 60 && (d.y + scaleFactor) < radius-40){
+                    return "translate(" + [x,y] + ")translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
+                } else {
+                    return "translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
+                }
             });
 
         if (transformed){
