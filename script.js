@@ -58,14 +58,16 @@ tooltip.append('div')
 tooltip.append('div')
     .attr('class', 'percent-to-parent');
 
+var data;
 
 // load and process data
-d3.json("asyl.json", function(error, data) {
+d3.json("asyl.json", function(error, root) {
     if (error) throw error;
-    partition(data);
-    //transformTree(data);
+    partition(root);
+    data = root;
+    //transformTree(root);
 
-    draw(data)
+    draw(root)
 });
 
 function length(x, y){
@@ -79,12 +81,15 @@ function rad2deg(angle) {
 
 // ******************************* drag event ****************************** //
 var drag = d3.behavior.drag()
-    .on("drag", function(d,i) {
-        d3.event.sourceEvent.stopPropagation(); 
-        console.log("dragstart");
-        //console.log(d3.event.dx + "   " + d3.event.dy);
+    .on("dragstart", function(d,i) {
+        //console.log("dragstart");
         dragging = true;
+        d3.event.sourceEvent.stopPropagation(); 
+    })
+    .on("drag", function(d,i) {
+        //console.log("drag");
         var depth = d.depth;
+        var transformed = false;
 
         // mouse input direction (normalized)
         var scaleFactor= length(d3.event.dx, d3.event.dy);
@@ -114,10 +119,25 @@ var drag = d3.behavior.drag()
                 }
         })
 
+        // get innderradius (d.y) from prev and next layer
+        var prevInnerR, nextInnerR, innerRing;
+        d3.select('.slice-' + (depth-1)).each(function(d) {prevInnerR =  d.y;});
+        d3.select('.slice-' + (depth+1)).each(function(d) {nextInnerR =  d.y;})
+
+
         // transform slices and labels
-        d3.selectAll('.slice-'+d.depth)
+        d3.selectAll('.slice-' + depth)
             .attr('d',  function(d,i){
                 d.y += (scaleFactor);
+
+                if (d.y < prevInnerR) {
+                    innerRing = depth-1;
+                    transformed = true;
+                } else if (d.y > nextInnerR) {
+                    innerRing = depth;
+                    transformed = true;
+                }
+
                 return arc(d);
         });
 
@@ -128,9 +148,18 @@ var drag = d3.behavior.drag()
                 var y = d3.event.dy;
                 return "translate(" + [x,y] + ")translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
             });
+
+        console.log("depth "+ depth); 
+        if (transformed){
+            console.log("transform:  inner Ring: " + innerRing);
+            data = transformTree(data, innerRing);
+            //console.log("draw data : ");
+            //console.log(JSON.parse(JSON.stringify(data, replacer)));
+            draw(data);
+        }
     })
     .on("dragend", function(d,i) {
-        console.log("dragend");
+        //console.log("dragend");
         dragging = false;
     });
 // ***************************************************************************** //
@@ -236,14 +265,13 @@ function draw(data)
     // ***************************************************************************** //
 }
 
-function transformTree(d){
+function transformTree(d, innerRing){
+    var depth1 = innerRing;
+
     var root = d;
     while (root.parent) root = root.parent;
 
     var data = root;
-
-    var depth1 = 2,
-        depth2 = 3;
 
     // get all parent nodes (tree's) from depth1
     var inputTrees = getNodes(data, depth1-1);
@@ -279,12 +307,11 @@ function transformTree(d){
             data = underTrees[0];
         }
     }
-
-
     
-    console.log("transformed tree");
-    console.log(JSON.parse(JSON.stringify(data, replacer)));
-    draw(data);
+    //console.log("transformed tree");
+    //console.log(JSON.parse(JSON.stringify(data, replacer)));
+    
+    return data;
 }
 
 
