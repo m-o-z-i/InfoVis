@@ -79,126 +79,12 @@ function rad2deg(angle) {
     return angle * (180 /  Math.PI);
 }
 
-
-var initDragging = false;
-var depthSelection = 0;
-var skipNextScale = false;
-// ******************************* drag event ****************************** //
-var drag = d3.behavior.drag()
-    .on("dragstart", function(d,i) {
-        //console.log("dragstart");
-        dragging = true;
-        initDragging = true;
-
-        d3.event.sourceEvent.stopPropagation(); 
-    })
-    .on("drag", function(d,i) {
-        //console.log("drag");
-        var transformed = false;
-        
-        if(initDragging){
-            depthSelection = d.depth;
-            initDragging = false;
-        }
-
-        // get mouse direction length ( plus avoid weird mouse bug after transformation...) 
-        var scaleFactor = 1;
-        if (!skipNextScale){
-           scaleFactor = length(d3.event.dx, d3.event.dy);
-        }
-        skipNextScale = false;
-
-        // mouse input direction (normalized)
-        var mouseDirection = [d3.event.dx/scaleFactor, d3.event.dy/scaleFactor];
-
-        // determine normalized direction vec
-        var localDirection = arc.centroid(d)
-        var l = length(localDirection[0], localDirection[1])
-        localDirection = [localDirection[0]/l, localDirection[1]/l];
-
-        // compute angle between local and mouse direction --> [if 0 --> decrease scale, if 180 --> decrease scale]
-        var angle = rad2deg(Math.acos(mouseDirection[0]*localDirection[0] + mouseDirection[1]*localDirection[1]))
-
-        // get direction of scala factor
-        if (angle > 90){
-            scaleFactor = -scaleFactor;
-        } 
-        
-        // move to front...
-        var group = d3.selectAll('.group')
-            .each(function(d) {
-                var parentG = d3.select(this)
-                var path = parentG.select('path');
-                if(depthSelection == path.attr('depth')){
-                    // move group to front
-                    parentG.moveToFront();
-                }
-        })
-
-        // get innderradius (d.y) from prev and next layer
-        var prevInnerR = 0, 
-            nextInnerR = radius, 
-            innerRing = 0;
-
-        d3.select('.slice-' + (depthSelection-1)).each(function(d) {prevInnerR =  d.y;});
-        d3.select('.slice-' + (depthSelection+1)).each(function(d) {nextInnerR = d.y;})
-
-        // transform slices and labels
-        //console.log("selection depth: "+ depthSelection + "   prevRing:  " +prevInnerR + "   innerRadius: " + d.y + "    nextRing:  " + nextInnerR); 
-        //console.log("scale factor " + scaleFactor);
-
-        d3.selectAll('.slice-' + depthSelection)
-            .attr('d',  function(d,i){
-                if ((d.y + scaleFactor) > 60 && (d.y + scaleFactor) < radius-40){
-                    d.y += (scaleFactor);
-                }
-
-                if (d.y < prevInnerR && d.y > 0 && !transformed) {
-                    innerRing = depthSelection-1;
-                    //console.log("decrease dept  " + d.y + ", " + prevInnerR + "  transformed: " + transformed)
-                    --depthSelection;
-                    transformed = true;
-                } else if (d.y > nextInnerR && d.y > 0 && !transformed) {
-                    innerRing = depthSelection;
-                    //console.log("increase dept  " + d.y + ", " + nextInnerR + "  transformed: " + transformed)
-                    ++depthSelection;
-                    transformed = true;
-                }
-
-                return arc(d);
-        });
-
-        d3.selectAll('.label-'+depthSelection)
-            .attr("transform", function(d, i) { 
-                var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
-                var x = d3.event.dx;
-                var y = d3.event.dy;
-
-                if ((d.y + scaleFactor) > 60 && (d.y + scaleFactor) < radius-40){
-                    return "translate(" + [x,y] + ")translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
-                } else {
-                    return "translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
-                }
-            });
-
-        if (transformed){
-            //console.log("transform:  inner Ring: " + innerRing);
-            data = transformTree(data, innerRing);
-            skipNextScale = true;
-            //console.log("draw data : ");
-            //console.log(JSON.parse(JSON.stringify(data, replacer)));
-            draw(data);
-        }
-    })
-    .on("dragend", function(d,i) {
-        //console.log("dragend");
-        dragging = false;
-        draw(data);
-    });
-// ***************************************************************************** //
+var drag = d3.behavior.drag();
 
 function draw(data)
-{
+{  
+    console.log('draw');
+
     partition(data);
 
     // remove all
@@ -212,7 +98,7 @@ function draw(data)
     var dataGroup = svg.selectAll("g")
         .data(partition(data), function(d, i) { return i; });
 
-    dataGroup.selectAll('path')
+    dataGroup.selectAll('.slice')
         .attr("d", arc);
     
     var newGroupes = dataGroup.enter()
@@ -221,48 +107,17 @@ function draw(data)
         .attr('class', function(d) { return "group"; });
 
     var newSlice = newGroupes.append("svg:path")
-        .attr('class', function(d) { return "slice-" + d.depth; })
-        .attr('depth', function(d) { return d.depth; })
+        .attr('class', 'slice')
+        .attr('depth', function(d) { return "slice"+d.depth; })
         .attr("id", function(d, i) { return "path-" + i; })
         .attr("d", arc)
         .style("fill", function(d) { return fill(d); })
         .attr("fill-rule", "evenodd")
         .attr('display', function(d, i) {if(i==0) return "none";})
-        .call(drag);
-    
-/*    newSlice.on('click', function(d) {
-        if (d3.event.defaultPrevented) return; // click suppressed
-        transformTree(d);
-    });*/
-
-    // get total size
-    var totalSize = data.value;
-
-    newSlice.on('mouseenter', function(d) {
-        if (dragging) return;
-        highlight(d);
-
-        var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.value ;
-
-        var percent = Math.round(1000 * d.value / totalSize) / 10;
-        var parentPercent = Math.round(1000 * d.value / parentSize) / 10;
-        tooltip.select('.label').html('<b>' + d.name + '</b>' );
-        tooltip.select('.count').html('count: ' + d.value); 
-        tooltip.select('.percent').html('total percent: ' + percent + '%'); 
-        tooltip.select('.percent-to-parent').html('percent to parent: ' + parentPercent + '%'); 
-        tooltip.style('display', 'block');
-    });
-
-    newSlice.on('mousemove', function(d) {
-        tooltip.style('left', (d3.event.pageX + 2) + 'px')
-               .style('top', (d3.event.pageY + 2) + 'px');
-    });
-
-    newSlice.on('mouseleave', function(d) {
-        unhighlight(d);
-        tooltip.style('display', 'none');
-    });
-
+        .call(drag)
+        .on('mouseenter', mouseenter)
+        .on('mousemove', mousemove)
+        .on('mouseleave', mouseleave);      
 
     dataGroup.exit()
         .remove();
@@ -279,8 +134,9 @@ function draw(data)
     var newLabel = newGroupes.append("svg:text")
         .attr('class', function(d, i) {
             if (i == 0) return "title";
-            else return "label-" + d.depth;
+            else return "label";
         })
+        .attr('depth', function(d) { return "label"+d.depth; })
         .attr("id", function(d, i) { return "label-" + i; })
         .attr("display", function(d, i) { if (d.value ==  0) return "none";})
         .attr("pointer-events", "none")
@@ -347,16 +203,196 @@ function transformTree(d, innerRing){
     return data;
 }
 
+// ################################ mouse events############################### //
+
+function mouseenter(d){
+    if (dragging) return;
+    // get total size
+    var totalSize = data.value;
+
+    highlight(d);
+
+    var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.value ;
+
+    var percent = Math.round(1000 * d.value / totalSize) / 10;
+    var parentPercent = Math.round(1000 * d.value / parentSize) / 10;
+    tooltip.select('.label').html('<b>' + d.name + '</b>' );
+    tooltip.select('.count').html('count: ' + d.value); 
+    tooltip.select('.percent').html('total percent: ' + percent + '%'); 
+    tooltip.select('.percent-to-parent').html('percent to parent: ' + parentPercent + '%'); 
+    tooltip.style('display', 'block');
+}
+
+function mousemove(d){
+    if (dragging)  {
+        tooltip.style('display', 'none');
+        return
+    }
+    tooltip.style('left', (d3.event.pageX + 2) + 'px')
+           .style('top', (d3.event.pageY + 2) + 'px');
+}
+
+function mouseleave(d){
+    if (dragging) return;
+    unhighlight(d);
+    tooltip.style('display', 'none');
+}
+
+
+
+var initDragging = false;
+var depthSelection = 0;
+var skipNextScale = false;
+
+var groupSelection, sliceSelection, labelSelection;
+// ******************************* drag event ****************************** //
+drag.on("dragstart", function(d,i) {
+        //console.log("dragstart");
+        dragging = true;
+        initDragging = true;
+        depthSelection = d.depth;
+
+        // move to front...
+        groupSelection = d3.selectAll('.group')
+            .each(function(d) {
+                var parentG = d3.select(this)
+                var path = parentG.select('path');
+                var depthName = path.attr('depth');
+                depthName = depthName.split('slice');
+                if(depthSelection == depthName[1]){
+                    // move group to front
+                    parentG.moveToFront();
+                }
+        })
+
+        sliceSelection = d3.selectAll("[depth=slice"+depthSelection+"]");
+        labelSelection = d3.selectAll("[depth=label"+depthSelection+"]");
+
+        console.log(sliceSelection);
+        console.log("depthSelection:  " + depthSelection);
+
+    })
+    .on("drag", function(d,i) {
+
+        var transformed = false;
+        
+        // get mouse direction length ( plus avoid weird mouse bug after transformation...) 
+        var scaleFactor = 1;
+        if (!skipNextScale){
+           scaleFactor = length(d3.event.dx, d3.event.dy);
+        }
+        skipNextScale = false;
+
+        // mouse input direction (normalized)
+        var mouseDirection = [d3.event.dx/scaleFactor, d3.event.dy/scaleFactor];
+
+        // determine normalized direction vec
+        var localDirection = arc.centroid(d)
+        var l = length(localDirection[0], localDirection[1])
+        localDirection = [localDirection[0]/l, localDirection[1]/l];
+
+        // compute angle between local and mouse direction --> [if 0 --> decrease scale, if 180 --> decrease scale]
+        var angle = rad2deg(Math.acos(mouseDirection[0]*localDirection[0] + mouseDirection[1]*localDirection[1]))
+
+        // get direction of scala factor
+        if (angle > 90){
+            scaleFactor = -scaleFactor;
+        } 
+        
+        // get innderradius (d.y) from prev and next layer
+        var prevInnerR = 0, 
+            nextInnerR = radius, 
+            innerRing = 0;
+
+        d3.select("[depth=slice"+(depthSelection-1)+"]").each(function(d) {prevInnerR = d.y;});
+        d3.select("[depth=slice"+(depthSelection+1)+"]").each(function(d) {nextInnerR = d.y;})
+
+        // transform slices and labels
+        sliceSelection
+            .attr('d',  function(d,i){
+                if ((d.y + scaleFactor) > 60 && (d.y + scaleFactor) < radius-40){
+                    d.y += (scaleFactor);
+                }
+
+                console.log("dy " + d.y);
+                if (d.y < prevInnerR && d.y > 0 && !transformed) {
+                    innerRing = depthSelection-1;
+                    //console.log("decrease dept  " + d.y + ", " + prevInnerR + "  transformed: " + transformed)
+                    --depthSelection;
+                    transformed = true;
+                } else if (d.y > nextInnerR && d.y > 0 && !transformed) {
+                    innerRing = depthSelection;
+                    //console.log("increase dept  " + d.y + ", " + nextInnerR + "  transformed: " + transformed)
+                    ++depthSelection;
+                    transformed = true;
+                }
+
+                return arc(d);
+        });
+
+        labelSelection
+            .attr("transform", function(d, i) { 
+                var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
+                var x = d3.event.dx;
+                var y = d3.event.dy;
+
+                if ((d.y + scaleFactor) > 60 && (d.y + scaleFactor) < radius-40){
+                    return "translate(" + [x,y] + ")translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
+                } else {
+                    return "translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
+                }
+            });
+            
+        if (transformed){
+            // draw data
+            data = transformTree(data, innerRing);
+            draw(data);
+            
+            // move to front...
+            groupSelection = d3.selectAll('.group')
+                .each(function(d) {
+                    var parentG = d3.select(this)
+                    var path = parentG.select('path');
+                    var depthName = path.attr('depth');
+                    depthName = depthName.split('slice');
+                    if(depthSelection == depthName[1]){
+                        // move group to front
+                        parentG.moveToFront();
+                    }
+                })
+
+            sliceSelection = d3.selectAll("[depth=slice"+depthSelection+"]");
+            labelSelection = d3.selectAll("[depth=label"+depthSelection+"]");
+
+            skipNextScale = true;
+            //console.log("draw data : ");
+            //console.log(JSON.parse(JSON.stringify(data, replacer)));
+        }
+    })
+    .on("dragend", function(d,i) {
+        //console.log("dragend");
+
+/*    d3.selectAll('path')
+        .on('mouseenter', mouseenter)
+        .on('mousemove', mousemove)
+        .on('mouseleave', mouseleave);*/
+
+        dragging = false;
+        draw(data);
+    });
+// ***************************************************************************** //
+// ############################################################################# //
+
 
 function highlight(d){
-    var ring = d3.selectAll('.slice-'+d.depth)
-        .attr('class', "path-active");
+    var ring = d3.selectAll("[depth=slice"+d.depth+"]")
+        .attr('class', "slice-active");
 }
 
 
 function unhighlight(d){
-    var ring = d3.selectAll('.path-active')
-        .attr('class', function(d) { return "slice-" + d.depth; });
+    var ring = d3.selectAll('.slice-active')
+        .attr('class', 'slice');
 }
 
 
@@ -374,6 +410,21 @@ function replacer(key, value) {
     }
     return value;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function processTree(d){
 

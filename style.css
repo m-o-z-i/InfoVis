@@ -1,4 +1,4 @@
-text {
+.label {
   pointer-events: none;
   color: black;
   font-size: 12px;
@@ -12,22 +12,23 @@ text {
   text-anchor: middle;
 }
 
-path {
+.slice {
   stroke: #fff;
   stroke-width: 5;
+  fill-opacity: 0.7;
   fill-rule: evenodd;
 }
 
-.path-active {
-  fill-opacity: 0.4;
-  /*fill: #0000ff !important;*/
+.slice-active {
+  stroke: #fff;
+  stroke-width: 5;
+  fill-opacity: 1;
+  fill-rule: evenodd;
 }
 
-path:hover {
+.slice:hover {
   fill-opacity: 0.65;
 }
-
-
 
 .tooltip {
   pointer-events: none;
