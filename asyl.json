@@ -1,43 +1,43 @@
 {
-  "name": "Flüchtlinge",
+  "name": "Refugee",
   "shortName": "Anz.",
   "children": [
     {
-      "name": "Deutschland",
+      "name": "Germany",
       "shortName": "DE",
       "children": [
         {
-          "name": "Syrien",
+          "name": "Syria",
           "shortName": "sy",
           "children": [
             {
-              "name": "Männlich",
+              "name": "Male",
               "shortName": "O->",
               "children": [
                 {
-                  "name": "<=18",
-                  "shortName": "<=18",
+                  "name": "Child",
+                  "shortName": "\u226418",
                   "size": 1
                 },
                 {
-                  "name": ">18",
-                  "shortName": ">18",
+                  "name": "Adult",
+                  "shortName": "\u003E18",
                   "size": 1
                 }
               ]
             },
             {
-              "name": "Weiblich",
+              "name": "Female",
               "shortName": "+O",
               "children": [
                 {
-                  "name": "<=18",
-                  "shortName": "<=18",
+                  "name": "Child",
+                  "shortName": "\u226418",
                   "size": 1
                 },
                 {
-                  "name": ">18",
-                  "shortName": ">18",
+                  "name": "Adult",
+                  "shortName": "\u003E18",
                   "size": 0
                 }
               ]
@@ -49,33 +49,33 @@
           "shortName": "Afg",
           "children": [
             {
-              "name": "Männlich",
+              "name": "Male",
               "shortName": "O->",
               "children": [
                 {
-                  "name": "<=18",
-                  "shortName": "<=18",
+                  "name": "Child",
+                  "shortName": "\u226418",
                   "size": 3
                 },
                 {
-                  "name": ">18",
-                  "shortName": ">18",
+                  "name": "Adult",
+                  "shortName": "\u003E18",
                   "size": 0
                 }
               ]
             },
             {
-              "name": "Weiblich",
+              "name": "Female",
               "shortName": "+O",
               "children": [
                 {
-                  "name": "<=18",
-                  "shortName": "<=18",
+                  "name": "Child",
+                  "shortName": "\u226418",
                   "size": 0
                 },
                 {
-                  "name": ">18",
-                  "shortName": ">18",
+                  "name": "Adult",
+                  "shortName": "\u003E18",
                   "size": 1
                 }
               ]
@@ -85,41 +85,41 @@
       ]
     },
     {
-      "name": "Frankreich",
+      "name": "France",
       "shortName": "FRA",
       "children": [
         {
-          "name": "Syrien",
+          "name": "Syria",
           "shortName": "sy",
           "children": [
             {
-              "name": "Männlich",
+              "name": "Male",
               "shortName": "O->",
               "children": [
                 {
-                  "name": "<=18",
-                  "shortName": "<=18",
+                  "name": "Child",
+                  "shortName": "\u226418",
                   "size": 2
                 },
                 {
-                  "name": ">18",
-                  "shortName": ">18",
+                  "name": "Adult",
+                  "shortName": "\u003E18",
                   "size": 0
                 }
               ]
             },
             {
-              "name": "Weiblich",
+              "name": "Female",
               "shortName": "+O",
               "children": [
                 {
-                  "name": "<=18",
-                  "shortName": "<=18",
+                  "name": "\u226418",
+                  "shortName": "\u226418",
                   "size": 0
                 },
                 {
-                  "name": ">18",
-                  "shortName": ">18",
+                  "name": "Adult",
+                  "shortName": "\u003E18",
                   "size": 0
                 }
               ]
@@ -131,33 +131,33 @@
           "shortName": "Afg",
           "children": [
             {
-              "name": "Männlich",
+              "name": "Male",
               "shortName": "O->",
               "children": [
                 {
-                  "name": "<=18",
-                  "shortName": "<=18",
+                  "name": "Child",
+                  "shortName": "\u226418",
                   "size": 0
                 },
                 {
-                  "name": ">18",
-                  "shortName": ">18",
+                  "name": "Adult",
+                  "shortName": "\u003E18",
                   "size": 0
                 }
               ]
             },
             {
-              "name": "Weiblich",
+              "name": "Female",
               "shortName": "+O",
               "children": [
                 {
-                  "name": "<=18",
-                  "shortName": "<=18",
+                  "name": "Child",
+                  "shortName": "\u226418",
                   "size": 1
                 },
                 {
-                  "name": ">18",
-                  "shortName": ">18",
+                  "name": "Adult",
+                  "shortName": "\u003E18",
                   "size": 0
                 }
               ]

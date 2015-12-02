@@ -1,7 +1,7 @@
 // Parallel Sets by Jason Davies, http://www.jasondavies.com/
 // Functionality based on http://eagereyes.org/parallel-sets
 (function() {
-  d3.parsets = function() {
+  d3.parsets = function(highlightHelper) {
     var event = dimensions_ = autoDimensions,
         dimensionFormat = String,
         tooltip_ = defaultTooltip,
@@ -13,6 +13,9 @@
         tension = 1,
         tension0,
         duration = 500;
+
+    console.log("parset");
+    console.log(highlightHelper);
 
     function parsets(selection) {
       selection.each(function(data, i) {
@@ -271,6 +274,19 @@
             for (var k in d.children) recurse(d.children[k]);
           })(d);
           highlight.shift();
+
+          var node = d;
+          var path = [];
+          while (node.parent) {
+            if (node.name) path.unshift(node.name);
+            node = node.parent;
+          }
+
+          highlightHelper['name']=d.name;
+          highlightHelper['path']=path.join(" ");
+
+          //console.log(highlightHelper);
+
           if (ancestors) while (d) highlight.push(d), d = d.parent;
           ribbon.filter(function(d) {
             var active = highlight.indexOf(d.node) >= 0;
@@ -282,6 +298,10 @@
         // Unhighlight all nodes.
         function unhighlight() {
           if (dragging) return;
+
+          highlightHelper['name']="";
+          highlightHelper['path']="";
+
           ribbon.classed("active", false);
           hideTooltip();
         }

@@ -84,6 +84,57 @@ tooltip.append('div')
     .attr('class', 'percent-to-parent');
 // **************************************************
 
+// **************** highlight synchro ***************
+var highlightHelper = {name:"", path:""};
+function watch(obj, prop, handler) { // make this a framework/global function
+    var currval = obj[prop];
+    function callback() {
+        if (obj[prop] != currval) {
+            var temp = currval;
+            currval = obj[prop];
+            handler(temp, currval);
+        }
+    }
+    return callback;
+}
+
+function getPath(d){
+    var p = d;
+    var pathD = [];
+    while (p.depth > 0){
+        pathD.unshift(p.name)
+        p = p.parent;
+    }
+
+    return pathD.join(" ");
+}
+
+var myhandler = function (oldval, newval) {
+    unhighlight();
+    console.log(highlightHelper);
+    if(highlightHelper['name'] == "") return;
+    
+    var selectedPath = d3.selectAll("[name="+ highlightHelper.name + "]")//.selectAll("[parentName="+ highlightHelper.parent + "]");
+
+
+    if(selectedPath.length > 0){
+        for (i in selectedPath[0]) {
+            var slice = selectedPath[0][i].parentNode.__data__;
+            if (slice) {
+                if(getPath(slice) == highlightHelper.path){
+                    console.log(slice);
+                    highlight(slice, true);
+                }
+            }
+        }
+    } else {
+        unhighlight();
+    }
+    
+};
+
+var intervalH = setInterval(watch(highlightHelper, "name", myhandler), 100);
+// **************************************************
 
 // ****************** Parallel Set ******************
 var parallelSetVis = {
@@ -91,7 +142,7 @@ var parallelSetVis = {
     height: 500
 }
 
-var parallelSet = d3.parsets()
+var parallelSet = d3.parsets(highlightHelper)
     .dimensions(["EUcountry", "asylCountry", "gender", "age"])
     .width(parallelSetVis.width)
     .height(parallelSetVis.height)
@@ -158,6 +209,8 @@ function draw(data)
         .attr('class', 'slice')
         .attr('depth', function(d) { return "slice"+d.depth; })
         .attr("id", function(d, i) { return "slice-" + i; })
+        .attr("name", function(d) { return d.name; })
+        .attr("parentName", function(d) { return (d.parent) ? d.parent.name : "" ; })
         .attr("d", arc)
         .style("fill", function(d) { return fill(d); })
         .attr("fill-rule", "evenodd")
@@ -290,6 +343,8 @@ function mouseleave(d){
     if (dragging) return;
     unhighlight();
     tooltip.style('display', 'none');
+
+    highlightHelper['name']=d.name;
 }
 
 
@@ -431,10 +486,20 @@ drag.on("dragstart", function(d,i) {
 // ***************************************************************************** //
 // ############################################################################# //
 
-
 function highlight(d, parents){
+    var p = d;
+    var path = [];
+    while (p.depth > 0){
+        path.unshift(p.name)
+        p = p.parent;
+    }
+
+    highlightHelper['name'] = d.name;
+    highlightHelper['path'] = path.join(" ");
+    
     var ring = d3.selectAll("[depth=slice"+d.depth+"]")
         .attr('class', "slice-active");
+
 
     if(parents){
         var parent = d;
@@ -451,6 +516,9 @@ function highlight(d, parents){
 function unhighlight(){
     var ring = d3.selectAll('.slice-active')
         .attr('class', 'slice');
+
+    //highlightHelper['name'] = "";
+    //highlightHelper['path'] = "";
 }
 
 
