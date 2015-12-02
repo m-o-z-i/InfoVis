@@ -12,7 +12,7 @@ var vis = {
 
 //var color = d3.scale.category20c();
 var hue = d3.scale.ordinal()
-  .domain([0,1,2,3,4,5,6,7,8,9])
+  .domain([1,0,2,3,4,5,6,7,8,9])
   .range(["#1f77b4", "#ff7f0e", "#2ca02c", 
           "#d62728" , "#9467bd", "#8c564b", 
           "#e377c2" , "#7f7f7f", "#bcbd22", "#17becf"]);
@@ -49,7 +49,7 @@ var arcDistance = d3.scale.linear().range([0, radius]);
 
 // define partition size
 var partition = d3.layout.partition()
-    //.sort(comparator)
+    //.sort(null)
     .size([2 * Math.PI, radius])
     //.children(function(d) { return isNaN(d.value) ? d3.entries(d.size) : null; })
     .value(function(d) { return d.size; });
@@ -505,7 +505,7 @@ function highlight(d, parents){
         var parent = d;
         while(parent.depth > 0) {       
             d3.select("[id=slice-"+(parent.id)+"]")
-                .attr('class', "slice-active");
+                .attr('class', "slice-active-p");
 
             parent=parent.parent
         }
@@ -514,9 +514,11 @@ function highlight(d, parents){
 
 
 function unhighlight(){
-    var ring = d3.selectAll('.slice-active')
+    d3.selectAll('.slice-active')
         .attr('class', 'slice');
 
+    d3.selectAll('.slice-active-p')
+        .attr('class', 'slice');
     //highlightHelper['name'] = "";
     //highlightHelper['path'] = "";
 }

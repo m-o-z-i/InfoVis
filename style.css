@@ -27,6 +27,13 @@
 .slice-active {
   stroke: #fff;
   stroke-width: 5;
+  fill-opacity: 0.75;
+  fill-rule: evenodd;
+}
+
+.slice-active-p {
+  stroke: #fff;
+  stroke-width: 5;
   fill-opacity: 1;
   fill-rule: evenodd;
 }
