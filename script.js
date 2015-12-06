@@ -106,7 +106,6 @@ function getPath(d){
         pathD.unshift(p.name)
         p = p.parent;
     }
-    console.log(pathD);
 
     return pathD.join(" ");
 }
@@ -124,9 +123,8 @@ var myhandler = function (oldval, newval) {
             var slice = selectedPath[0][i].parentNode.__data__;
             if (slice) {
                 if(getPath(slice) == highlightHelper.path){
-                    //console.log(slice);
                     if(highlightHelper.parents){
-                        highlight(slice, false, true);
+                        highlight(slice, false, true, false);
                     } else {
                         highlight(slice, false, false, true);                        
                     }
@@ -273,7 +271,8 @@ function transformTree(d, innerRing){
     // get all parent nodes (tree's) from depth1
     var inputTrees = getNodes(data, depth1-1);
     //console.log(JSON.parse(JSON.stringify(inputTrees, replacer)));
-    if (inputTrees.length < 1 || !inputTrees[0].children) return data;
+ 
+   if (inputTrees.length < 1 || !inputTrees[0].children) return data;
 
     // process each under tree
     var underTrees = []
@@ -516,7 +515,6 @@ function highlight(d, ancestor, parents, childs){
     }
 
     if (childs) {
-
         d3.selectAll("[name="+d.name+"]")
             .attr('class', "slice-active-p")
             .forEach(function(d) { 
@@ -530,6 +528,7 @@ function highlight(d, ancestor, parents, childs){
 
 
     if(parents){
+        highlightChilds(d)
         var parent = d;
         while(parent.depth > 0) {       
             d3.select("[id=slice-"+(parent.id)+"]")
@@ -539,6 +538,7 @@ function highlight(d, ancestor, parents, childs){
         }
     }
 }
+
 function highlightChilds(d){
     if(d && d.children){    
         for (i in d.children){
