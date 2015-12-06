@@ -85,7 +85,7 @@ tooltip.append('div')
 // **************************************************
 
 // **************** highlight synchro ***************
-var highlightHelper = {name:"", path:""};
+var highlightHelper = {name:"", path:"", parents:true};
 function watch(obj, prop, handler) { // make this a framework/global function
     var currval = obj[prop];
     function callback() {
@@ -101,10 +101,12 @@ function watch(obj, prop, handler) { // make this a framework/global function
 function getPath(d){
     var p = d;
     var pathD = [];
+
     while (p.depth > 0){
         pathD.unshift(p.name)
         p = p.parent;
     }
+    console.log(pathD);
 
     return pathD.join(" ");
 }
@@ -122,18 +124,24 @@ var myhandler = function (oldval, newval) {
             var slice = selectedPath[0][i].parentNode.__data__;
             if (slice) {
                 if(getPath(slice) == highlightHelper.path){
-                    console.log(slice);
-                    highlight(slice, true);
+                    //console.log(slice);
+                    if(highlightHelper.parents){
+                        highlight(slice, false, true);
+                    } else {
+                        highlight(slice, false, false, true);                        
+                    }
                 }
             }
         }
     } else {
+        console.log('fail');
         unhighlight();
     }
     
 };
 
-var intervalH = setInterval(watch(highlightHelper, "name", myhandler), 100);
+var intervalH = setInterval(watch(highlightHelper, "path", myhandler), 100);
+var intervalH2 = setInterval(watch(highlightHelper, "parents", myhandler), 100);
 // **************************************************
 
 // ****************** Parallel Set ******************
@@ -309,7 +317,7 @@ function mouseenter(d){
     // get total size
     var totalSize = data.value;
 
-    highlight(d, true);
+    highlight(d, true, true);
 
     var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.value ;
 
@@ -486,19 +494,39 @@ drag.on("dragstart", function(d,i) {
 // ***************************************************************************** //
 // ############################################################################# //
 
-function highlight(d, parents){
+function highlight(d, ancestor, parents, childs){
+    console.log('highlight');
+
     var p = d;
     var path = [];
     while (p.depth > 0){
         path.unshift(p.name)
         p = p.parent;
     }
+    //console.log('highlight');
 
     highlightHelper['name'] = d.name;
     highlightHelper['path'] = path.join(" ");
-    
-    var ring = d3.selectAll("[depth=slice"+d.depth+"]")
-        .attr('class', "slice-active");
+    highlightHelper['parents'] = true;
+
+        
+    if (ancestor){
+        var ring = d3.selectAll("[depth=slice"+d.depth+"]")
+            .attr('class', "slice-active");
+    }
+
+    if (childs) {
+
+        d3.selectAll("[name="+d.name+"]")
+            .attr('class', "slice-active-p")
+            .forEach(function(d) { 
+                if(d){
+                    for (i in d) {
+                        highlightChilds(d[i].__data__);
+                    }
+                }
+            })
+    }
 
 
     if(parents){
@@ -511,9 +539,18 @@ function highlight(d, parents){
         }
     }
 }
-
+function highlightChilds(d){
+    if(d && d.children){    
+        for (i in d.children){
+            var currentNode = d.children[i];
+            d3.select("[id=slice-"+(currentNode.id)+"]").attr('class', "slice-active-p");
+            highlightChilds(currentNode);
+        }
+    }
+}
 
 function unhighlight(){
+    console.log('unhighlight');
     d3.selectAll('.slice-active')
         .attr('class', 'slice');
 
@@ -521,6 +558,7 @@ function unhighlight(){
         .attr('class', 'slice');
     //highlightHelper['name'] = "";
     //highlightHelper['path'] = "";
+    //highlightHelper['parents'] = true;
 }
 
 
@@ -535,7 +573,7 @@ function fill(d) {
 }
 
 function replacer(key, value) {
-    if( key === "parent" || key === "dx" || key === "x" ||key === "y" || key === "dy" || key === "depth" || key === "shortName") {
+    if( key === "parent" || key === "dx" || key === "x" ||key === "y" || key === "dy" || key === "shortName") {
         return undefined;
     }
     return value;
@@ -697,12 +735,7 @@ function resetData(root) {
     partition(root);
 }
 
-function countSize(root) {
-    var sum = 0;
-    partition.nodes(root)
-        .forEach(function(d) { if (d.size) { sum+=d.size;  } });
-    return sum;
-}
+
 
 
 

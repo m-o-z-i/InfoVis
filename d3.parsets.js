@@ -2,6 +2,7 @@
 // Functionality based on http://eagereyes.org/parallel-sets
 (function() {
   d3.parsets = function(highlightHelper) {
+
     var event = dimensions_ = autoDimensions,
         dimensionFormat = String,
         tooltip_ = defaultTooltip,
@@ -19,6 +20,7 @@
 
     function parsets(selection) {
       selection.each(function(data, i) {
+
         var g = d3.select(this),
             ordinal = d3.scale.ordinal(),
             dragging = false,
@@ -198,6 +200,60 @@
           updateRibbons();
         }
 
+
+        // **************** highlight synchro ***************
+/*        function watch(obj, prop, handler) { // make this a framework/global function
+            var currval = obj[prop];
+            function callback() {
+                if (obj[prop] != currval) {
+                    var temp = currval;
+                    currval = obj[prop];
+                    handler(temp, currval);
+                }
+            }
+            return callback;
+        }
+
+        function getPath(d){
+            var p = d;
+            var pathD = [];
+            while (p.depth > 0){
+                pathD.unshift(p.name)
+                p = p.parent;
+            }
+
+            return pathD.join(" ");
+        }
+
+        var myhandler = function (oldval, newval) {
+
+
+            console.log('dooo somethhing');
+            unhighlight();
+            if(highlightHelper['name'] == "") return;
+            
+            var selectedPath = d3.selectAll("[name="+ highlightHelper.name + "]");
+
+
+            if(selectedPath.length > 0){
+                for (i in selectedPath[0]) {
+                    var slice = selectedPath[0][i].parentNode.__data__;
+                    if (slice) {
+                        if(getPath(slice) == highlightHelper.path){
+                            console.log(slice);
+                            highlight(slice);
+                        }
+                    }
+                }
+            } else {
+                unhighlight();
+            }
+            
+        };
+
+        var intervalH = setInterval(watch(highlightHelper, "name", myhandler), 100);*/
+        // **************************************************
+
         function sortBy(type, f, dimension) {
           return function(d) {
             var direction = this.__direction = -(this.__direction || 1);
@@ -267,6 +323,9 @@
 
         // Highlight a node and its descendants, and optionally its ancestors.
         function highlight(d, ancestors) {
+          // call watcher 
+          //highlightHelper['name']="";
+
           if (dragging) return;
           var highlight = [];
           (function recurse(d) {
@@ -285,9 +344,14 @@
           highlightHelper['name']=d.name;
           highlightHelper['path']=path.join(" ");
 
-          //console.log(highlightHelper);
+          console.log(highlightHelper);
 
-          if (ancestors) while (d) highlight.push(d), d = d.parent;
+          if (ancestors) {
+            highlightHelper['parents']=true;
+            while (d) highlight.push(d), d = d.parent;
+          } else {
+            highlightHelper['parents']=false;
+          }
           ribbon.filter(function(d) {
             var active = highlight.indexOf(d.node) >= 0;
             if (active) this.parentNode.appendChild(this);
@@ -301,6 +365,7 @@
 
           highlightHelper['name']="";
           highlightHelper['path']="";
+          highlightHelper['parents']=true;
 
           ribbon.classed("active", false);
           hideTooltip();
