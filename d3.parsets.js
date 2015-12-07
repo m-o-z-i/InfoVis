@@ -1,7 +1,7 @@
 // Parallel Sets by Jason Davies, http://www.jasondavies.com/
 // Functionality based on http://eagereyes.org/parallel-sets
 (function() {
-  d3.parsets = function(highlightHelper) {
+  d3.parsets = function(highlightHelper, ownHighlightHelper) {
 
     var event = dimensions_ = autoDimensions,
         dimensionFormat = String,
@@ -14,9 +14,6 @@
         tension = 1,
         tension0,
         duration = 500;
-
-    console.log("parset");
-    console.log(highlightHelper);
 
     function parsets(selection) {
       selection.each(function(data, i) {
@@ -31,9 +28,7 @@
             total,
             ribbon;
 
-        //console.log(dimensionNames);
-
-        d3.select(window).on("mousemove.parsets." + ++parsetsId, unhighlight);
+        d3.select(window).on("mousemove.parsets." + ++parsetsId);
 
         if (tension0 == null) tension0 = tension;
         g.selectAll(".ribbon, .ribbon-mouse")
@@ -202,7 +197,7 @@
 
 
         // **************** highlight synchro ***************
-/*        function watch(obj, prop, handler) { // make this a framework/global function
+        function watch(obj, prop, handler) { // make this a framework/global function
             var currval = obj[prop];
             function callback() {
                 if (obj[prop] != currval) {
@@ -225,33 +220,61 @@
             return pathD.join(" ");
         }
 
+        function checkString(str1, str2) {
+          var badString = str1;
+          var godString = str2;
+          var zeroCounter = 0;
+
+          if(str1.length < str2.length){
+            badString = str2;
+            godString = str1;
+          }
+          
+          for (var i = 0, n = badString.length; i+zeroCounter < n; i++) {
+            if(badString.charCodeAt(i+zeroCounter) == '0'){
+              ++zeroCounter;
+            } 
+
+            if (badString.charCodeAt(i+zeroCounter) !== godString.charCodeAt(i)){
+              return false;
+            }
+          }
+
+          return true;
+        }
+
         var myhandler = function (oldval, newval) {
-
-
-            console.log('dooo somethhing');
-            unhighlight();
-            if(highlightHelper['name'] == "") return;
+            //console.log(ownHighlightHelper);
+            unhighlight(true);
+            if(ownHighlightHelper['name'] == "") return;
             
-            var selectedPath = d3.selectAll("[name="+ highlightHelper.name + "]");
+            //var selectedPath = d3.selectAll("[path="+ ownHighlightHelper.path + "]");
+            var selectedPath = d3.select("#parallelSetVis").selectAll("[name="+ ownHighlightHelper.name + "]");
+            //console.log(selectedPath);
 
+            var rootNode = true;
 
             if(selectedPath.length > 0){
                 for (i in selectedPath[0]) {
-                    var slice = selectedPath[0][i].parentNode.__data__;
+                    var slice = selectedPath[0][i].__data__;
                     if (slice) {
-                        if(getPath(slice) == highlightHelper.path){
-                            console.log(slice);
-                            highlight(slice);
+                      if(slice.path){
+                        if(checkString(slice.path, ownHighlightHelper.path)){
+                            rootNode = false;
+                            highlight(slice, true, true);
                         }
+                      } else if (rootNode){
+                        // root node like germany or france
+                        highlight(slice.nodes[0], false, true);
+                      }
                     }
                 }
             } else {
-                unhighlight();
+                unhighlight(true);
             }
-            
         };
 
-        var intervalH = setInterval(watch(highlightHelper, "name", myhandler), 100);*/
+        var intervalH = setInterval(watch(ownHighlightHelper, "path", myhandler), 100);
         // **************************************************
 
         function sortBy(type, f, dimension) {
@@ -275,12 +298,15 @@
                 d.target.x0 = d.target.x;
               })
               .attr("class", function(d) { return "category-" + d.major; })
+              .attr("name", function(d) { return d.name;})
+              .attr("path", function(d) { return d.path;})
               .attr("d", ribbonPath);
           ribbon.sort(function(a, b) { return b.count - a.count; });
           ribbon.exit().remove();
           var mouse = g.select(".ribbon-mouse").selectAll("path")
               .data(nodes, function(d) { return d.path; });
           mouse.enter().append("path")
+              .on("mouseout.parsets", unhighlight)
               .on("mousemove.parsets", function(d) {
                 ribbon.classed("active", false);
                 if (dragging) return;
@@ -321,10 +347,18 @@
           };
         }
 
+        function replacer(key, value) {
+            if( key === "parentwww" || key === "children" || key === "node" ||key === "dimension" || key === "childrens" || key === "shortName") {
+                return undefined;
+            }
+            return value;
+        }
+
+
         // Highlight a node and its descendants, and optionally its ancestors.
-        function highlight(d, ancestors) {
-          // call watcher 
-          //highlightHelper['name']="";
+        function highlight(d, ancestors, syncmode) {
+          //console.log("highlight following path  ancestors: " + ancestors + "  syncmode: " + syncmode);
+          //console.log(JSON.parse(JSON.stringify(d, replacer)));
 
           if (dragging) return;
           var highlight = [];
@@ -341,17 +375,21 @@
             node = node.parent;
           }
 
-          highlightHelper['name']=d.name;
-          highlightHelper['path']=path.join(" ");
-
-          console.log(highlightHelper);
-
-          if (ancestors) {
-            highlightHelper['parents']=true;
-            while (d) highlight.push(d), d = d.parent;
-          } else {
+          if(!syncmode){
+            highlightHelper['name']=d.name;
+            highlightHelper['path']=path.join("");
             highlightHelper['parents']=false;
           }
+
+          //console.log(highlightHelper);
+
+          if (ancestors) {
+            if(!syncmode){
+              highlightHelper['parents']=true;
+            }
+            while (d) highlight.push(d), d = d.parent;
+          }
+
           ribbon.filter(function(d) {
             var active = highlight.indexOf(d.node) >= 0;
             if (active) this.parentNode.appendChild(this);
@@ -360,12 +398,13 @@
         }
 
         // Unhighlight all nodes.
-        function unhighlight() {
+        function unhighlight(syncmode) {
           if (dragging) return;
-
-          highlightHelper['name']="";
-          highlightHelper['path']="";
-          highlightHelper['parents']=true;
+          //if (!syncmode){
+            highlightHelper['name']="";
+            highlightHelper['path']="";
+            highlightHelper['parents']=true;
+          //}
 
           ribbon.classed("active", false);
           hideTooltip();
@@ -376,6 +415,7 @@
               .data(function(d) { return d.categories; }, function(d) { return d.name; });
           var categoryEnter = category.enter().append("g")
               .attr("class", "category")
+              .attr("name", function(d) { return d.name; })
               .attr("transform", function(d) { return "translate(" + d.x + ")"; });
           category.exit().remove();
           category

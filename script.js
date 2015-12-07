@@ -85,7 +85,9 @@ tooltip.append('div')
 // **************************************************
 
 // **************** highlight synchro ***************
-var highlightHelper = {name:"", path:"", parents:true};
+var highlightHelperCircle = {name:"", path:"", parents:true};
+var highlightHelperParallel = {name:"", path:"", parents:true};
+
 function watch(obj, prop, handler) { // make this a framework/global function
     var currval = obj[prop];
     function callback() {
@@ -107,39 +109,41 @@ function getPath(d){
         p = p.parent;
     }
 
-    return pathD.join(" ");
+    return pathD.join("");
 }
 
 var myhandler = function (oldval, newval) {
-    unhighlight();
-    console.log(highlightHelper);
-    if(highlightHelper['name'] == "") return;
+    unhighlight(true);
+    //console.log(highlightHelperCircle);
+    if(highlightHelperCircle['name'] == "") return;
     
-    var selectedPath = d3.selectAll("[name="+ highlightHelper.name + "]")//.selectAll("[parentName="+ highlightHelper.parent + "]");
+    var selectedPath = d3.select("#cirlceSetVis").selectAll("[name="+ highlightHelperCircle.name + "]")//.selectAll("[parentName="+ highlightHelperCircle.parent + "]");
+    //var selectedPath = d3.selectAll("[name="+ highlightHelperCircle.name + "]")//.selectAll("[parentName="+ highlightHelperCircle.parent + "]");
+    //console.log(selectedPath);
 
 
     if(selectedPath.length > 0){
         for (i in selectedPath[0]) {
             var slice = selectedPath[0][i].parentNode.__data__;
             if (slice) {
-                if(getPath(slice) == highlightHelper.path){
-                    if(highlightHelper.parents){
-                        highlight(slice, false, true, false);
+                if(getPath(slice) == highlightHelperCircle.path){
+                    if(highlightHelperCircle.parents){
+                        highlight(slice, false, true, false, true);
                     } else {
-                        highlight(slice, false, false, true);                        
+                        highlight(slice, false, false, true, true);                        
                     }
                 }
             }
         }
     } else {
         console.log('fail');
-        unhighlight();
+        unhighlight(true);
     }
     
 };
 
-var intervalH = setInterval(watch(highlightHelper, "path", myhandler), 100);
-var intervalH2 = setInterval(watch(highlightHelper, "parents", myhandler), 100);
+var intervalH = setInterval(watch(highlightHelperCircle, "path", myhandler), 100);
+var intervalH2 = setInterval(watch(highlightHelperCircle, "parents", myhandler), 100);
 // **************************************************
 
 // ****************** Parallel Set ******************
@@ -148,7 +152,7 @@ var parallelSetVis = {
     height: 500
 }
 
-var parallelSet = d3.parsets(highlightHelper)
+var parallelSet = d3.parsets(highlightHelperCircle, highlightHelperParallel)
     .dimensions(["EUcountry", "asylCountry", "gender", "age"])
     .width(parallelSetVis.width)
     .height(parallelSetVis.height)
@@ -351,7 +355,7 @@ function mouseleave(d){
     unhighlight();
     tooltip.style('display', 'none');
 
-    highlightHelper['name']=d.name;
+    highlightHelperCircle['name']=d.name;
 }
 
 
@@ -493,9 +497,7 @@ drag.on("dragstart", function(d,i) {
 // ***************************************************************************** //
 // ############################################################################# //
 
-function highlight(d, ancestor, parents, childs){
-    console.log('highlight');
-
+function highlight(d, ancestor, parents, childs, syncmode){
     var p = d;
     var path = [];
     while (p.depth > 0){
@@ -504,9 +506,11 @@ function highlight(d, ancestor, parents, childs){
     }
     //console.log('highlight');
 
-    highlightHelper['name'] = d.name;
-    highlightHelper['path'] = path.join(" ");
-    highlightHelper['parents'] = true;
+    if(!syncmode){
+        highlightHelperParallel['name'] = d.name;
+        highlightHelperParallel['path'] = path.join("");
+        highlightHelperParallel['parents'] = true;
+    }
 
         
     if (ancestor){
@@ -515,7 +519,7 @@ function highlight(d, ancestor, parents, childs){
     }
 
     if (childs) {
-        d3.selectAll("[name="+d.name+"]")
+        d3.select("#cirlceSetVis").selectAll("[name="+d.name+"]")
             .attr('class', "slice-active-p")
             .forEach(function(d) { 
                 if(d){
@@ -549,16 +553,17 @@ function highlightChilds(d){
     }
 }
 
-function unhighlight(){
-    console.log('unhighlight');
+function unhighlight(syncmode){
     d3.selectAll('.slice-active')
         .attr('class', 'slice');
 
     d3.selectAll('.slice-active-p')
         .attr('class', 'slice');
-    //highlightHelper['name'] = "";
-    //highlightHelper['path'] = "";
-    //highlightHelper['parents'] = true;
+    //if(!syncmode){
+        highlightHelperParallel['name'] = "";
+        highlightHelperParallel['path'] = "";
+        highlightHelperParallel['parents'] = true;
+    //}
 }
 
 
