@@ -1,7 +1,7 @@
 // Parallel Sets by Jason Davies, http://www.jasondavies.com/
 // Functionality based on http://eagereyes.org/parallel-sets
 (function() {
-  d3.parsets = function(highlightHelper, ownHighlightHelper) {
+  d3.parsets = function(highlightHelperCircle, highlightHelperParallel, dragHelperCircle, dragHelperParallel) {
 
     var event = dimensions_ = autoDimensions,
         dimensionFormat = String,
@@ -16,6 +16,8 @@
         duration = 500;
 
     function parsets(selection) {
+      var drag = d3.behavior.drag().origin(identity);
+
       selection.each(function(data, i) {
 
         var g = d3.select(this),
@@ -50,10 +52,11 @@
           };
         }
 
+        var dimension;
         function updateDimensions() {
           // Cache existing bound dimensions to preserve sort order.
-          var dimension = g.selectAll("g.dimension"),
-              cache = {};
+          dimension = g.selectAll("g.dimension");
+          var cache = {};
           dimension.each(function(d) { cache[d.name] = d; });
           dimensionNames.forEach(function(d) {
             if (!cache.hasOwnProperty(d)) {
@@ -133,55 +136,8 @@
               .text("size »")
               .on("mousedown.parsets", cancelEvent);
           dimension
-              .call(d3.behavior.drag()
-                .origin(identity)
-                .on("dragstart", function(d) {
-                  dragging = true;
-                  d.y0 = d.y;
-                })
-                .on("drag", function(d) {
-                  d.y0 = d.y = d3.event.y;
-                  for (var i = 1; i < dimensions.length; i++) {
-                    if (height * dimensions[i].y < height * dimensions[i - 1].y) {
-                      dimensions.sort(compareY);
-                      dimensionNames = dimensions.map(dimensionName);
-                      ordinal.domain([]).range(d3.range(dimensions[0].categories.length));
-
-                      //console.log(dimensions);
-                      //console.log(dimensionNames);
-                      
-                      //console.log("###############################");
-                      //console.log(nodes);
-                      nodes = layout(tree = buildTree({children: {}, count: 0}, data, dimensionNames, value_), dimensions, ordinal);
-                      //console.log(nodes);
-                      total = getTotal(dimensions);
-                      g.selectAll(".ribbon, .ribbon-mouse").selectAll("path").remove();
-                      updateRibbons();
-                      updateCategories(dimension);
-                      dimension.transition().duration(duration)
-                          .attr("transform", translateY)
-                          .tween("ribbon", ribbonTweenY);
-                      break;
-                    }
-                  }
-                  d3.select(this)
-                      .attr("transform", "translate(0," + d.y + ")")
-                      .transition();
-                  ribbon.filter(function(r) { return r.source.dimension === d || r.target.dimension === d; })
-                      .attr("d", ribbonPath);
-                })
-                .on("dragend", function(d) {
-                  dragging = false;
-                  unhighlight();
-                  var y0 = 45,
-                      dy = (height - y0 - 2) / (dimensions.length - 1);
-                  dimensions.forEach(function(d, i) {
-                    d.y = y0 + i * dy;
-                  });
-                  transition(d3.select(this))
-                      .attr("transform", "translate(0," + d.y + ")")
-                      .tween("ribbon", ribbonTweenY);
-                }));
+              .call(drag);
+          
           dimension.select("text").select("tspan.sort.alpha")
               .on("click.parsets", sortBy("alpha", function(a, b) { return a.name < b.name ? 1 : -1; }, dimension));
           dimension.select("text").select("tspan.sort.size")
@@ -194,6 +150,78 @@
           updateCategories(dimension);
           updateRibbons();
         }
+        
+
+          drag.on("dragstart", dragStart)
+              .on("drag", dragMove)
+              .on("dragend", dragEnd);
+
+          function dragStart(d) {
+            console.log(d3.event.x + "  " + d3.event.y);
+            dragHelperCircle['x']=d3.event.x;
+            dragHelperCircle['y']=d3.event.y;
+            dragHelperCircle['depth']=0;
+            dragHelperCircle['drag']="start";
+
+            dragging = true;
+            d.y0 = d.y;
+          }
+          function dragMove(d) {
+            //console.log(d3.event.x + "  " + d3.event.y);
+            dragHelperCircle['x']=d3.event.dx;
+            dragHelperCircle['y']=d3.event.dy;
+            dragHelperCircle['drag']="move";
+            
+            d.y0 = d.y = d3.event.y;
+
+            for (var i = 1; i < dimensions.length; i++) {
+              if (height * dimensions[i].y < height * dimensions[i - 1].y) {
+                dimensions.sort(compareY);
+                dimensionNames = dimensions.map(dimensionName);
+                ordinal.domain([]).range(d3.range(dimensions[0].categories.length));
+
+                //console.log(dimensions);
+                //console.log(dimensionNames);
+                
+                //console.log("###############################");
+                //console.log(nodes);
+                nodes = layout(tree = buildTree({children: {}, count: 0}, data, dimensionNames, value_), dimensions, ordinal);
+                //console.log(nodes);
+                total = getTotal(dimensions);
+                g.selectAll(".ribbon, .ribbon-mouse").selectAll("path").remove();
+                updateRibbons();
+                updateCategories(dimension);
+                dimension.transition().duration(duration)
+                    .attr("transform", translateY)
+                    .tween("ribbon", ribbonTweenY);
+                break;
+              }
+            }
+            d3.select(this)
+                .attr("transform", "translate(0," + d.y + ")")
+                .transition();
+            ribbon.filter(function(r) { return r.source.dimension === d || r.target.dimension === d; })
+                .attr("d", ribbonPath);
+          }
+          function dragEnd(d) {
+            dragHelperCircle['x']=0;
+            dragHelperCircle['y']=0;
+            dragHelperCircle['depth']=0;
+            dragHelperCircle['drag']="end";
+
+            dragging = false;
+            unhighlight();
+            var y0 = 45,
+                dy = (height - y0 - 2) / (dimensions.length - 1);
+            dimensions.forEach(function(d, i) {
+              d.y = y0 + i * dy;
+            });
+            transition(d3.select(this))
+                .attr("transform", "translate(0," + d.y + ")")
+                .tween("ribbon", ribbonTweenY);
+          }
+
+
 
 
         // **************** highlight synchro ***************
@@ -207,17 +235,6 @@
                 }
             }
             return callback;
-        }
-
-        function getPath(d){
-            var p = d;
-            var pathD = [];
-            while (p.depth > 0){
-                pathD.unshift(p.name)
-                p = p.parent;
-            }
-
-            return pathD.join(" ");
         }
 
         function checkString(str1, str2) {
@@ -243,13 +260,13 @@
           return true;
         }
 
-        var myhandler = function (oldval, newval) {
-            //console.log(ownHighlightHelper);
+        var highlightHandler = function (oldval, newval) {
+            //console.log(highlightHelperParallel);
             unhighlight(true);
-            if(ownHighlightHelper['name'] == "") return;
+            if(highlightHelperParallel['name'] == "") return;
             
-            //var selectedPath = d3.selectAll("[path="+ ownHighlightHelper.path + "]");
-            var selectedPath = d3.select("#parallelSetVis").selectAll("[name="+ ownHighlightHelper.name + "]");
+            //var selectedPath = d3.selectAll("[path="+ highlightHelperParallel.path + "]");
+            var selectedPath = d3.select("#parallelSetVis").selectAll("[name="+ highlightHelperParallel.name + "]");
             //console.log(selectedPath);
 
             var rootNode = true;
@@ -259,7 +276,7 @@
                     var slice = selectedPath[0][i].__data__;
                     if (slice) {
                       if(slice.path){
-                        if(checkString(slice.path, ownHighlightHelper.path)){
+                        if(checkString(slice.path, highlightHelperParallel.path)){
                             rootNode = false;
                             highlight(slice, true, true);
                         }
@@ -274,7 +291,13 @@
             }
         };
 
-        var intervalH = setInterval(watch(ownHighlightHelper, "path", myhandler), 100);
+        var dragHandler = function (oldval, newval) {
+            console.log('drag handler parallel');
+        }
+
+        var intervalH = setInterval(watch(highlightHelperParallel, "path", highlightHandler), 100);
+        var intervalD1 = setInterval(watch(dragHelperParallel, "x", dragHandler), 100);
+        var intervalD2 = setInterval(watch(dragHelperParallel, "y", dragHandler), 100);
         // **************************************************
 
         function sortBy(type, f, dimension) {
@@ -376,16 +399,16 @@
           }
 
           if(!syncmode){
-            highlightHelper['name']=d.name;
-            highlightHelper['path']=path.join("");
-            highlightHelper['parents']=false;
+            highlightHelperCircle['name']=d.name;
+            highlightHelperCircle['path']=path.join("");
+            highlightHelperCircle['parents']=false;
           }
 
-          //console.log(highlightHelper);
+          //console.log(highlightHelperCircle);
 
           if (ancestors) {
             if(!syncmode){
-              highlightHelper['parents']=true;
+              highlightHelperCircle['parents']=true;
             }
             while (d) highlight.push(d), d = d.parent;
           }
@@ -401,9 +424,9 @@
         function unhighlight(syncmode) {
           if (dragging) return;
           //if (!syncmode){
-            highlightHelper['name']="";
-            highlightHelper['path']="";
-            highlightHelper['parents']=true;
+            highlightHelperCircle['name']="";
+            highlightHelperCircle['path']="";
+            highlightHelperCircle['parents']=true;
           //}
 
           ribbon.classed("active", false);

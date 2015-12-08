@@ -87,6 +87,8 @@ tooltip.append('div')
 // **************** highlight synchro ***************
 var highlightHelperCircle = {name:"", path:"", parents:true};
 var highlightHelperParallel = {name:"", path:"", parents:true};
+var dragHelperCircle = {x:0, y:0, depth:0, drag:""};
+var dragHelperParallel = {x:0, y:0, depth:0, drag:""};
 
 function watch(obj, prop, handler) { // make this a framework/global function
     var currval = obj[prop];
@@ -112,7 +114,7 @@ function getPath(d){
     return pathD.join("");
 }
 
-var myhandler = function (oldval, newval) {
+var highlightHandler = function (oldval, newval) {
     unhighlight(true);
     //console.log(highlightHelperCircle);
     if(highlightHelperCircle['name'] == "") return;
@@ -139,11 +141,31 @@ var myhandler = function (oldval, newval) {
         console.log('fail');
         unhighlight(true);
     }
-    
 };
 
-var intervalH = setInterval(watch(highlightHelperCircle, "path", myhandler), 100);
-var intervalH2 = setInterval(watch(highlightHelperCircle, "parents", myhandler), 100);
+var dragHandler = function (oldval, newval) {
+    //console.log(dragHelperCircle);
+    
+
+    if (dragHelperCircle.drag === "start"){
+        dragStart(undefined, dragHelperCircle.y, 1)
+
+    } else if (dragHelperCircle.drag === "move"){
+        dragMove(undefined, dragHelperCircle.y, 1)
+
+    } else if (dragHelperCircle.drag === "end"){
+        dragEnd()
+
+    } else {
+
+    }
+}
+
+
+var intervalH1 = setInterval(watch(highlightHelperCircle, "path", highlightHandler), 100);
+var intervalH2 = setInterval(watch(highlightHelperCircle, "parents", highlightHandler), 100);
+var intervalD1 = setInterval(watch(dragHelperCircle, "x", dragHandler), 20);
+var intervalD2 = setInterval(watch(dragHelperCircle, "y", dragHandler), 20);
 // **************************************************
 
 // ****************** Parallel Set ******************
@@ -152,7 +174,7 @@ var parallelSetVis = {
     height: 500
 }
 
-var parallelSet = d3.parsets(highlightHelperCircle, highlightHelperParallel)
+var parallelSet = d3.parsets(highlightHelperCircle, highlightHelperParallel, dragHelperCircle, dragHelperParallel)
     .dimensions(["EUcountry", "asylCountry", "gender", "age"])
     .width(parallelSetVis.width)
     .height(parallelSetVis.height)
@@ -381,16 +403,27 @@ var initDragging = false;
 var depthSelection = 0;
 var skipNextScale = false;
 
+var startY = 0;
+var index = 0;
+
 var groupSelection, sliceSelection, labelSelection;
 drag.on("dragstart", dragStart)
     .on("drag", dragMove)
     .on("dragend", dragEnd);
 
-function dragStart(d) {
-    //console.log("dragstart");
+function dragStart(d, simulatedY, depth) {
+    //dragHelperParallel['x']=d3.event.x;
+    //dragHelperParallel['y']=d3.event.y;
+
     dragging = true;
     initDragging = true;
-    depthSelection = d.depth;
+
+    index = 0;
+    startY = simulatedY;
+
+    if(typeof d === "undefined") depthSelection = depth;
+    else depthSelection = d.depth;
+    console.log("start:  " + d +"    "+ simulatedY +"   "+ depthSelection);
 
     // move to front...
     groupSelection = d3.selectAll('.group')
@@ -409,34 +442,57 @@ function dragStart(d) {
     labelSelection = d3.selectAll("[depth=label"+depthSelection+"]");
 }
 
-function dragMove(d) {
-    var transformed = false;
+function dragMove(d, simulatedY, depth) {
+    //dragHelperParallel['x']=d3.event.x;
+    //dragHelperParallel['y']=d3.event.y;
+    console.log("move:  " + d +"   "+ simulatedY +"   "+ depth);
 
-    var mouseDX = d3.event.dx;
-    var mouseDY = d3.event.dy;
+    var transformed = false;
+    var mouseDX;
+    var mouseDX;
+
+    if(typeof d === "undefined"){
+        if (index < 1){
+            startY = simulatedY;
+            console.log("set: startY " + startY);
+        }
+        mouseDX = 0;
+        mouseDY = simulatedY;
+    } else {
+        mouseDX = d3.event.dx;
+        mouseDY = d3.event.dy;
+    }
         
     // get mouse direction length ( plus avoid weird mouse bug after transformation...) 
     var scaleFactor = 1;
     if (!skipNextScale){
        scaleFactor = length(mouseDX, mouseDY);
     }
+    console.log('scalefactor ' + scaleFactor);    
     skipNextScale = false;
 
-    // mouse input direction (normalized)
-    var mouseDirection = [mouseDX/scaleFactor, mouseDY/scaleFactor];
+    if(typeof d === "undefined"){
+        if(mouseDY < 0 ){
+            scaleFactor = -scaleFactor
+        }
 
-    // determine normalized direction vec
-    var localDirection = arc.centroid(d)
-    var l = length(localDirection[0], localDirection[1])
-    localDirection = [localDirection[0]/l, localDirection[1]/l];
+    } else {
+        // mouse input direction (normalized)
+        var mouseDirection = [mouseDX/scaleFactor, mouseDY/scaleFactor];
 
-    // compute angle between local and mouse direction --> [if 0 --> decrease scale, if 180 --> decrease scale]
-    var angle = rad2deg(Math.acos(mouseDirection[0]*localDirection[0] + mouseDirection[1]*localDirection[1]))
+        // determine normalized direction vec
+        var localDirection = arc.centroid(d)
+        var l = length(localDirection[0], localDirection[1])
+        localDirection = [localDirection[0]/l, localDirection[1]/l];
 
-    // get direction of scala factor
-    if (angle > 90){
-        scaleFactor = -scaleFactor;
-    } 
+        // compute angle between local and mouse direction --> [if 0 --> decrease scale, if 180 --> decrease scale]
+        var angle = rad2deg(Math.acos(mouseDirection[0]*localDirection[0] + mouseDirection[1]*localDirection[1]))
+
+        // get direction of scala factor
+        if (angle > 90){
+            scaleFactor = -scaleFactor;
+        } 
+    }
     
     // get innderradius (d.y) from prev and next layer
     var prevInnerR = 0, 
@@ -503,9 +559,12 @@ function dragMove(d) {
         //console.log("draw data : ");
         //console.log(JSON.parse(JSON.stringify(data, replacer)));
     }
+    ++index;
 }
 
 function dragEnd(d) {
+    dragHelperParallel['x']=0;
+    dragHelperParallel['y']=0;
     //console.log("dragend");
 
     /*d3.selectAll('path')
