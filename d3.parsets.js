@@ -168,8 +168,8 @@
           }
           function dragMove(d) {
             //console.log(d3.event.x + "  " + d3.event.y);
-            dragHelperCircle['x']=d3.event.dx;
-            dragHelperCircle['y']=d3.event.dy;
+            dragHelperCircle['x']=d3.event.x;
+            dragHelperCircle['y']=d3.event.y;
             dragHelperCircle['drag']="move";
             
             d.y0 = d.y = d3.event.y;

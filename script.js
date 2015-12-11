@@ -403,8 +403,11 @@ var initDragging = false;
 var depthSelection = 0;
 var skipNextScale = false;
 
-var startY = 0;
 var index = 0;
+
+var mouseY = 0;
+var mouseDX = 0;
+var mouseDY = 0;
 
 var groupSelection, sliceSelection, labelSelection;
 drag.on("dragstart", dragStart)
@@ -419,7 +422,7 @@ function dragStart(d, simulatedY, depth) {
     initDragging = true;
 
     index = 0;
-    startY = simulatedY;
+    mouseY = simulatedY;
 
     if(typeof d === "undefined") depthSelection = depth;
     else depthSelection = d.depth;
@@ -448,16 +451,12 @@ function dragMove(d, simulatedY, depth) {
     console.log("move:  " + d +"   "+ simulatedY +"   "+ depth);
 
     var transformed = false;
-    var mouseDX;
-    var mouseDX;
 
     if(typeof d === "undefined"){
-        if (index < 1){
-            startY = simulatedY;
-            console.log("set: startY " + startY);
-        }
         mouseDX = 0;
-        mouseDY = simulatedY;
+        mouseDY = mouseY - simulatedY;
+        console.log('mousedX = ' + mouseDY);
+        mouseY = simulatedY;
     } else {
         mouseDX = d3.event.dx;
         mouseDY = d3.event.dy;
@@ -472,10 +471,9 @@ function dragMove(d, simulatedY, depth) {
     skipNextScale = false;
 
     if(typeof d === "undefined"){
-        if(mouseDY < 0 ){
+        if(mouseDY > 0 ){
             scaleFactor = -scaleFactor
         }
-
     } else {
         // mouse input direction (normalized)
         var mouseDirection = [mouseDX/scaleFactor, mouseDY/scaleFactor];
