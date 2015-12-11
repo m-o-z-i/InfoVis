@@ -148,10 +148,10 @@ var dragHandler = function (oldval, newval) {
     
 
     if (dragHelperCircle.drag === "start"){
-        dragStart(undefined, dragHelperCircle.y, 1)
+        dragStart(undefined, dragHelperCircle.y, dragHelperCircle.depth+1)
 
     } else if (dragHelperCircle.drag === "move"){
-        dragMove(undefined, dragHelperCircle.y, 1)
+        dragMove(undefined, dragHelperCircle.y, dragHelperCircle.depth+1)
 
     } else if (dragHelperCircle.drag === "end"){
         dragEnd()
@@ -340,10 +340,6 @@ function transformTree(d, innerRing){
 
 
 
-
-
-
-
 // ################################ mouse events############################### //
 function mouseenter(d){
     // get total size
@@ -435,7 +431,7 @@ function dragStart(d, simulatedY, depth) {
     } else {
         depthSelection = d.depth;
     }
-    console.log("start:  " + d +"    "+ simulatedY +"   "+ depthSelection);
+    //console.log("start:  " + d +"    "+ simulatedY +"   "+ depthSelection);
 
     // move to front...
     groupSelection = d3.selectAll('.group')
@@ -468,7 +464,7 @@ function dragMove(d, simulatedY, depth) {
     if(dragSyncMode){
         mouseDX = 0;
         mouseDY = mouseStartY - simulatedY - transformedMousePos;
-        console.log('released way = ' + mouseDY);
+        //console.log('released way = ' + mouseDY);
     } else {
         mouseDX = d3.event.dx;
         mouseDY = d3.event.dy;
@@ -514,11 +510,11 @@ function dragMove(d, simulatedY, depth) {
     sliceSelection
         .attr('d',  function(d,i){
             if(dragSyncMode){
-                if ((oldDY - cirlceScale(mouseDY)) > 10 && (oldDY - cirlceScale(mouseDY)) < radius-10){
+                if ((oldDY - cirlceScale(mouseDY)) > 50 && (oldDY - cirlceScale(mouseDY)) < radius-50){
                     d.y = oldDY - cirlceScale(mouseDY) 
                 }
             } else {
-                if ((d.y + scaleFactor) > 10 && (d.y + scaleFactor) < radius-10){
+                if ((d.y + scaleFactor) > 50 && (d.y + scaleFactor) < radius-50){
                     d.y += (scaleFactor);
                 }
             }
@@ -554,8 +550,6 @@ function dragMove(d, simulatedY, depth) {
         // get new start y position.. for drag helper
         //depthSelectiondepthSelectiondepthSelectionmouseStartY = simulatedY;
         d3.select("[depth=slice"+(depthSelection)+"]").each(function(d) {oldDY = d.y;});
-
-
         
         // move to front...
         groupSelection = d3.selectAll('.group')
