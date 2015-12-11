@@ -206,7 +206,7 @@ d3.json("asyl.json", function(error, root) {
 
 var drag = d3.behavior.drag();
 
-function draw(data)
+function draw(data, ringDepth, currentScale)
 {  
     console.log('draw');
 
@@ -227,10 +227,7 @@ function draw(data)
 
     // ********************     pie slices      ************************************** //
     var dataGroup = svgCircle.selectAll("g")
-        .data(partition(data), function(d, i) { return i; });
-
-    dataGroup.selectAll('.slice')
-        .attr("d", arc);
+        .data(partition(data)/*, function(d, i) { return i; }*/);
     
     var newGroupes = dataGroup.enter()
         .append("svg:g")
@@ -250,7 +247,42 @@ function draw(data)
         .call(drag)
         .on('mouseenter', mouseenter)
         .on('mousemove', mousemove)
-        .on('mouseleave', mouseleave);      
+        .on('mouseleave', mouseleave); 
+
+    // transition
+    if(typeof ringDepth !== "undefined" && typeof currentScale !== "undefined"){
+        // move to front...
+        groupSelection = d3.selectAll('.group')
+            .each(function(d) {
+                var parentG = d3.select(this)
+                var path = parentG.select('path');
+                var depthName = path.attr('depth');
+                depthName = depthName.split('slice');
+                if(ringDepth == depthName[1]){
+                    // move group to front
+                    parentG.moveToFront();
+                }
+        })
+
+        // save old pos
+        var oldDY
+        d3.select("[depth=slice"+(ringDepth)+"]").each(function(d) {oldDY = d.y;});
+        
+        // reset to last pos of drag end
+        var ring = d3.selectAll("[depth=slice"+(ringDepth)+"]")
+            .attr('d', function(d) {
+                d.y = currentScale;
+                return arc(d);
+            });
+
+        // transition to old pos
+        ring.transition().duration(200)
+            .attr('d', function(d) {
+                d.y = oldDY;
+                return arc(d);
+            });
+    }
+
 
     dataGroup.exit()
         .remove();
@@ -285,60 +317,6 @@ function draw(data)
         .text(function(d, i) { if (i==0) return d.value; });   
     // ***************************************************************************** //
 }
-
-function transformTree(d, innerRing){
-    var depth1 = innerRing;
-
-    var root = d;
-    while (root.parent) root = root.parent;
-
-    var data = root;
-
-    // get all parent nodes (tree's) from depth1
-    var inputTrees = getNodes(data, depth1-1);
-    //console.log(JSON.parse(JSON.stringify(inputTrees, replacer)));
- 
-   if (inputTrees.length < 1 || !inputTrees[0].children) return data;
-
-    // process each under tree
-    var underTrees = []
-    for (i in inputTrees){
-        underTrees[i] = processTree(inputTrees[i]);
-    }
-
-    if (depth1 > 2) {
-        for (i in underTrees){
-            var underTree = underTrees[i];
-            // find root:
-            for (x in data.children){
-                var currentNode = data.children[x];
-                if(currentNode.name == underTree.parent){
-                    for (y in currentNode.children){
-                        var currentChild = currentNode.children[y];
-                        if (currentChild.name == underTree.name){
-                            currentNode.children[y] = underTree;
-                        }
-                    }
-                }
-            }
-        }
-    }else {
-        if(underTrees.length > 1){
-            data['children'] = underTrees;
-        } else if (underTrees.length === 1) {
-            data = underTrees[0];
-        }
-    }
-    
-    //console.log("transformed tree");
-    //console.log(JSON.parse(JSON.stringify(data, replacer)));
-    
-    return data;
-}
-
-
-
-
 
 // ################################ mouse events############################### //
 function mouseenter(d){
@@ -385,15 +363,6 @@ function mouseleave(d){
 
 
 
-
-
-
-
-
-
-
-
-
 // ******************************* drag event ****************************** //
 var initDragging = false;
 var depthSelection = 0;
@@ -408,6 +377,11 @@ var oldDY = 0;
 var dragSyncMode = false;
 var transformedMousePos = 0;
 
+// transition
+var currentScale;
+var changedDepth;
+var changedScale;
+
 cirlceScale = d3.scale.linear().domain([0,198]).range([0,80]);
 
 var groupSelection, sliceSelection, labelSelection;
@@ -421,6 +395,9 @@ function dragStart(d, simulatedY, depth) {
 
     dragging = true;
     initDragging = true;
+    currentScale = 0;
+    changedDepth = 0;
+    changedScale = 0;
 
     index = 0;
 
@@ -428,7 +405,9 @@ function dragStart(d, simulatedY, depth) {
         dragSyncMode = true;
         depthSelection = depth;
         d3.select("[depth=slice"+(depthSelection)+"]").each(function(d) {oldDY = d.y;});
+        currentScale = oldDY;
     } else {
+        currentScale = d.y;
         depthSelection = d.depth;
     }
     //console.log("start:  " + d +"    "+ simulatedY +"   "+ depthSelection);
@@ -454,6 +433,8 @@ function dragMove(d, simulatedY, depth) {
     //dragHelperParallel['x']=d3.event.x;
     //dragHelperParallel['y']=d3.event.y;
     //console.log("move:  " + d +"   "+ simulatedY +"   "+ depth);
+
+    changedDepth = depthSelection;
 
     if (mouseStartY === -1){
         mouseStartY = simulatedY;
@@ -511,20 +492,24 @@ function dragMove(d, simulatedY, depth) {
         .attr('d',  function(d,i){
             if(dragSyncMode){
                 if ((oldDY - cirlceScale(mouseDY)) > 50 && (oldDY - cirlceScale(mouseDY)) < radius-50){
-                    d.y = oldDY - cirlceScale(mouseDY) 
+                    d.y = oldDY - cirlceScale(mouseDY)
+                    currentScale = d.y;
                 }
             } else {
                 if ((d.y + scaleFactor) > 50 && (d.y + scaleFactor) < radius-50){
                     d.y += (scaleFactor);
+                    currentScale = d.y;
                 }
             }
 
             if (d.y < prevInnerR && d.y > 0 && !transformed) {
+                changedScale = prevInnerR;
                 innerRing = depthSelection-1;
                 //console.log("decrease dept  " + d.y + ", " + prevInnerR + "  transformed: " + transformed)
                 --depthSelection;
                 transformed = true;
             } else if (d.y > nextInnerR && d.y > 0 && !transformed) {
+                changedScale = nextInnerR;
                 innerRing = depthSelection;
                 //console.log("increase dept  " + d.y + ", " + nextInnerR + "  transformed: " + transformed)
                 ++depthSelection;
@@ -543,7 +528,7 @@ function dragMove(d, simulatedY, depth) {
     if (transformed){
         // draw data
         data = transformTree(data, innerRing);
-        draw(data);
+        draw(data, changedDepth, changedScale);
 
         transformedMousePos += mouseDY;
 
@@ -575,6 +560,7 @@ function dragMove(d, simulatedY, depth) {
 }
 
 function dragEnd(d) {
+
     dragHelperParallel['x']=0;
     dragHelperParallel['y']=0;
     mouseStartY = -1;
@@ -588,7 +574,15 @@ function dragEnd(d) {
         .on('mouseleave', mouseleave);*/
 
     dragging = false;
-    draw(data);
+
+/*    partition(data);
+    var dataGroup = svgCircle.selectAll('.slice')
+        .attr("d", arc);*/
+
+    console.log(depthSelection + "  " + currentScale);
+
+
+    draw(data, depthSelection, currentScale);
 }
 // ***************************************************************************** //
 // ############################################################################# //
@@ -692,6 +686,57 @@ function fill(d) {
 
 
 
+function transformTree(d, innerRing){
+
+    console.log('transform tree');
+    var depth1 = innerRing;
+
+    var root = d;
+    while (root.parent) root = root.parent;
+
+    var data = root;
+
+    // get all parent nodes (tree's) from depth1
+    var inputTrees = getNodes(data, depth1-1);
+    //console.log(JSON.parse(JSON.stringify(inputTrees, replacer)));
+ 
+   if (inputTrees.length < 1 || !inputTrees[0].children) return data;
+
+    // process each under tree
+    var underTrees = []
+    for (i in inputTrees){
+        underTrees[i] = processTree(inputTrees[i]);
+    }
+
+    if (depth1 > 2) {
+        for (i in underTrees){
+            var underTree = underTrees[i];
+            // find root:
+            for (x in data.children){
+                var currentNode = data.children[x];
+                if(currentNode.name == underTree.parent){
+                    for (y in currentNode.children){
+                        var currentChild = currentNode.children[y];
+                        if (currentChild.name == underTree.name){
+                            currentNode.children[y] = underTree;
+                        }
+                    }
+                }
+            }
+        }
+    }else {
+        if(underTrees.length > 1){
+            data['children'] = underTrees;
+        } else if (underTrees.length === 1) {
+            data = underTrees[0];
+        }
+    }
+    
+    //console.log("transformed tree");
+    //console.log(JSON.parse(JSON.stringify(data, replacer)));
+    
+    return data;
+}
 
 
 function replacer(key, value) {
