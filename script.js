@@ -405,9 +405,14 @@ var skipNextScale = false;
 
 var index = 0;
 
-var mouseY = 0;
+var mouseStartY = -1;
 var mouseDX = 0;
 var mouseDY = 0;
+var oldDY = 0;
+var dragSyncMode = false;
+var transformedMousePos = 0;
+
+cirlceScale = d3.scale.linear().domain([0,198]).range([0,80]);
 
 var groupSelection, sliceSelection, labelSelection;
 drag.on("dragstart", dragStart)
@@ -422,10 +427,14 @@ function dragStart(d, simulatedY, depth) {
     initDragging = true;
 
     index = 0;
-    mouseY = simulatedY;
 
-    if(typeof d === "undefined") depthSelection = depth;
-    else depthSelection = d.depth;
+    if(typeof d === "undefined"){
+        dragSyncMode = true;
+        depthSelection = depth;
+        d3.select("[depth=slice"+(depthSelection)+"]").each(function(d) {oldDY = d.y;});
+    } else {
+        depthSelection = d.depth;
+    }
     console.log("start:  " + d +"    "+ simulatedY +"   "+ depthSelection);
 
     // move to front...
@@ -448,15 +457,18 @@ function dragStart(d, simulatedY, depth) {
 function dragMove(d, simulatedY, depth) {
     //dragHelperParallel['x']=d3.event.x;
     //dragHelperParallel['y']=d3.event.y;
-    console.log("move:  " + d +"   "+ simulatedY +"   "+ depth);
+    //console.log("move:  " + d +"   "+ simulatedY +"   "+ depth);
+
+    if (mouseStartY === -1){
+        mouseStartY = simulatedY;
+    }
 
     var transformed = false;
 
-    if(typeof d === "undefined"){
+    if(dragSyncMode){
         mouseDX = 0;
-        mouseDY = mouseY - simulatedY;
-        console.log('mousedX = ' + mouseDY);
-        mouseY = simulatedY;
+        mouseDY = mouseStartY - simulatedY - transformedMousePos;
+        console.log('released way = ' + mouseDY);
     } else {
         mouseDX = d3.event.dx;
         mouseDY = d3.event.dy;
@@ -467,13 +479,11 @@ function dragMove(d, simulatedY, depth) {
     if (!skipNextScale){
        scaleFactor = length(mouseDX, mouseDY);
     }
-    console.log('scalefactor ' + scaleFactor);    
+    //console.log('scalefactor ' + scaleFactor);    
     skipNextScale = false;
 
-    if(typeof d === "undefined"){
-        if(mouseDY > 0 ){
-            scaleFactor = -scaleFactor
-        }
+    if(dragSyncMode){
+        scaleFactor = -mouseDY
     } else {
         // mouse input direction (normalized)
         var mouseDirection = [mouseDX/scaleFactor, mouseDY/scaleFactor];
@@ -503,9 +513,16 @@ function dragMove(d, simulatedY, depth) {
     // transform slices and labels
     sliceSelection
         .attr('d',  function(d,i){
-            if ((d.y + scaleFactor) > 30 && (d.y + scaleFactor) < radius-30){
-                d.y += (scaleFactor);
+            if(dragSyncMode){
+                if ((oldDY - cirlceScale(mouseDY)) > 10 && (oldDY - cirlceScale(mouseDY)) < radius-10){
+                    d.y = oldDY - cirlceScale(mouseDY) 
+                }
+            } else {
+                if ((d.y + scaleFactor) > 10 && (d.y + scaleFactor) < radius-10){
+                    d.y += (scaleFactor);
+                }
             }
+
             if (d.y < prevInnerR && d.y > 0 && !transformed) {
                 innerRing = depthSelection-1;
                 //console.log("decrease dept  " + d.y + ", " + prevInnerR + "  transformed: " + transformed)
@@ -524,18 +541,21 @@ function dragMove(d, simulatedY, depth) {
     labelSelection
         .attr("transform", function(d, i) { 
             var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
- 
-            if ((d.y + scaleFactor) > 60 && (d.y + scaleFactor) < radius-40){
-                return "translate(" + [mouseDX,mouseDY] + ")translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
-            } else {
-                return "translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
-            }
+            return "translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
         });
         
     if (transformed){
         // draw data
         data = transformTree(data, innerRing);
         draw(data);
+
+        transformedMousePos += mouseDY;
+
+        // get new start y position.. for drag helper
+        //depthSelectiondepthSelectiondepthSelectionmouseStartY = simulatedY;
+        d3.select("[depth=slice"+(depthSelection)+"]").each(function(d) {oldDY = d.y;});
+
+
         
         // move to front...
         groupSelection = d3.selectAll('.group')
@@ -563,6 +583,9 @@ function dragMove(d, simulatedY, depth) {
 function dragEnd(d) {
     dragHelperParallel['x']=0;
     dragHelperParallel['y']=0;
+    mouseStartY = -1;
+    dragSyncMode = false;
+    transformedMousePos = 0;
     //console.log("dragend");
 
     /*d3.selectAll('path')

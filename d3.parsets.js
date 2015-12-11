@@ -157,10 +157,10 @@
               .on("dragend", dragEnd);
 
           function dragStart(d) {
-            console.log(d3.event.x + "  " + d3.event.y);
+            //console.log(d3.event.x + "  " + d3.event.y);
             dragHelperCircle['x']=d3.event.x;
             dragHelperCircle['y']=d3.event.y;
-            dragHelperCircle['depth']=0;
+            dragHelperCircle['depth']=1;
             dragHelperCircle['drag']="start";
 
             dragging = true;
