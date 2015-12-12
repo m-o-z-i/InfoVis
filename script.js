@@ -106,7 +106,7 @@ var parallelSetVis = {
     height: 500
 }
 
-var dimNames = ["drag0", "drag1", "drag2", "drag3"];
+var dimNames = ["EU country", "foreign country", "sex", "age"];
 
 var parallelSet = d3.parsets(highlightHelperCircle, highlightHelperParallel, dragHelperCircle, dragHelperParallel)
     .dimensions(dimNames)

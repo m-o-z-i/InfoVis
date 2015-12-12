@@ -127,7 +127,7 @@
               .attr("transform", "translate(0,-25)");
           textEnter.append("tspan")
               .attr("class", "name")
-              .text("drag"/*dimensionFormatName*/);
+              .text(dimensionFormatName);
 /*          textEnter.append("tspan")
               .attr("class", "sort alpha")
               .attr("dx", "2em")
@@ -167,13 +167,10 @@
           function dragStart(d, xxx, xxx, syncmode) {
             objDrag = d;
             if (syncmode) {
-              for (var i = 0; i < dimensions.length; i++) {
-                if(dimensions[i].name.split("drag").pop() == (dragHelperParallel['depth'])){
-                  objDrag=dimensions[i];
-                  break;
-                }
-              };
-              thisDimension = parallelSetVis.select("g#drag"+(dragHelperParallel['depth']))[0][0];
+              var sel = parallelSetVis.selectAll("g[depth=d"+ dragHelperParallel['depth'] +"]");
+              objDrag = sel[0][0].__data__;
+              console.log(objDrag);
+              thisDimension = parallelSetVis.select("g[depth=d"+ dragHelperParallel['depth'] +"]")[0][0];
             } 
             else{
               var depth;
@@ -197,13 +194,9 @@
           function dragMove(d, xxx, xxx, syncmode) {
             // somehow failed to select object.. try again
             if(!objDrag && syncmode) {
-              for (var i = 0; i < dimensions.length; i++) {
-                if(dimensions[i].name.split("drag").pop() == (dragHelperParallel['depth'])){
-                  objDrag=dimensions[i];
-                  break;
-                }
-              };
-              thisDimension = parallelSetVis.select("g#drag"+(dragHelperParallel['depth']))[0][0];
+              var sel = parallelSetVis.select("g[depth=d"+ dragHelperParallel['depth'] +"]");
+              objDrag = sel[0][0].__data__;
+              thisDimension = parallelSetVis.select("g[depth=d"+ dragHelperParallel['depth'] +"]")[0][0];
             }
             //if (syncmode) return; 
 
@@ -238,6 +231,8 @@
                 ordinal.domain([]).range(d3.range(dimensions[0].categories.length));
 
                 nodes = layout(tree = buildTree({children: {}, count: 0}, data, dimensionNames, value_), dimensions, ordinal);
+
+
 
                 total = getTotal(dimensions);
                 g.selectAll(".ribbon, .ribbon-mouse").selectAll("path").remove();
@@ -352,7 +347,6 @@
         };
 
         var dragHandler = function (oldval, newval) {
-            console.log(dragHelperParallel);
             if (dragHelperParallel.drag === "start"){
                 dragStart(undefined, undefined, undefined, true);
 
@@ -365,9 +359,9 @@
         }
 
         var intervalH = setInterval(watch(highlightHelperParallel, "path", highlightHandler), 100);
-        var intervalD1 = setInterval(watch(dragHelperParallel, "x", dragHandler), 1);
+        //var intervalD1 = setInterval(watch(dragHelperParallel, "x", dragHandler), 1);
         var intervalD2 = setInterval(watch(dragHelperParallel, "y", dragHandler), 1);
-        var intervalD3 = setInterval(watch(dragHelperParallel, "drag", dragHandler), 1);
+        //var intervalD3 = setInterval(watch(dragHelperParallel, "drag", dragHandler), 1);
         // **************************************************
 
         function sortBy(type, f, dimension) {
@@ -381,8 +375,7 @@
           };
         }
 
-        function updateRibbons() {
-          
+        function updateRibbons() {        
           ribbon = g.select(".ribbon").selectAll("path")
               .data(nodes, function(d) { return d.path; });
           ribbon.enter().append("path")
@@ -440,19 +433,8 @@
           };
         }
 
-        function replacer(key, value) {
-            if( key === "parentwww" || key === "children" || key === "node" ||key === "dimension" || key === "childrens" || key === "shortName") {
-                return undefined;
-            }
-            return value;
-        }
-
-
         // Highlight a node and its descendants, and optionally its ancestors.
         function highlight(d, ancestors, syncmode) {
-          //console.log("highlight following path  ancestors: " + ancestors + "  syncmode: " + syncmode);
-          //console.log(JSON.parse(JSON.stringify(d, replacer)));
-
           if (dragging) return;
           var highlight = [];
           (function recurse(d) {
@@ -504,6 +486,21 @@
         }
 
         function updateCategories(g) {
+
+          // update depth
+          parallelSetVis.selectAll("g.dimension")
+            .attr('depth', function(d, i) {
+              var index = 0;
+              dimensionNames.forEach(function(name, i) {
+                if(name === d.name) {
+                  index = i;
+                  return;
+                }
+              });
+              return "d"+index;
+            });
+
+
           var category = g.selectAll("g.category")
               .data(function(d) { return d.categories; }, function(d) { return d.name; });
           var categoryEnter = category.enter().append("g")
@@ -837,10 +834,6 @@
   // dimensions.  Similar to d3.nest, except we also set the parent.
   function buildTree(root, data, dimensions, value) {
     zeroCounts(root);
-    //console.log(root);
-    //console.log(data);
-    //console.log(dimensions);
-    //console.log(value);
     var n = data.length,
         nd = dimensions.length;
     for (var i = 0; i < n; i++) {
