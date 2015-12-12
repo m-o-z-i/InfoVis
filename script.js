@@ -4,7 +4,17 @@ d3.selection.prototype.moveToFront = function() {
   });
 };
 
+
+var highlightHelperCircle = {name:"", path:"", parents:true};
+var highlightHelperParallel = {name:"", path:"", parents:true};
+var dragHelperCircle = {x:0, y:0, depth:0, drag:""};
+var dragHelperParallel = {x:0, y:0, depth:0, drag:""};
+
+
 var SVGMousePos = d3.select("#mouseSVG").node().parentElement;
+
+var drag = d3.behavior.drag();
+
 
 // visualisation settings
 var vis = {
@@ -72,8 +82,12 @@ var svgCircle = d3.select('#Visualisations')
   .append("svg:g")
     .attr("transform", "translate(" + circleSetVis.width / 2 + "," + (circleSetVis.height / 2) + ")");
 
+var circleSetVis = d3.select('#cirlceSetVis');
+
+
+
 // add tooltip to DOM
-var tooltip = d3.select('#Visualisations')
+var tooltip = circleSetVis
     .append('div')
     .attr('class', 'tooltipCircle');
 tooltip.append('div')
@@ -86,12 +100,35 @@ tooltip.append('div')
     .attr('class', 'percent-to-parent');
 // **************************************************
 
-// **************** highlight synchro ***************
-var highlightHelperCircle = {name:"", path:"", parents:true};
-var highlightHelperParallel = {name:"", path:"", parents:true};
-var dragHelperCircle = {x:0, y:0, depth:0, drag:""};
-var dragHelperParallel = {x:0, y:0, depth:0, drag:""};
+// ****************** Parallel Set ******************
+var parallelSetVis = {
+    width: 700,
+    height: 500
+}
 
+var parallelSet = d3.parsets(highlightHelperCircle, highlightHelperParallel, dragHelperCircle, dragHelperParallel)
+    .dimensions(["EUcountry", "asylCountry", "gender", "age"])
+    .width(parallelSetVis.width)
+    .height(parallelSetVis.height)
+    .duration(duration);
+
+var svgParallel = d3.select('#Visualisations')
+  .append("div")
+    .attr('id', 'parallelSetVis')
+  .append("svg")
+    //.attr('x', circleSetVis.width)
+    .attr("width", parallelSet.width())
+    .attr("height", parallelSet.height());
+
+var parallelSetVis = d3.select('#parallelSetVis');
+
+d3.csv("refugee.csv", function(csv) {
+    svgParallel.datum(csv).call(parallelSet);
+});
+// **************************************************
+
+
+// **************** highlight synchro ***************
 function watch(obj, prop, handler) { // make this a framework/global function
     var currval = obj[prop];
     function callback() {
@@ -121,10 +158,7 @@ var highlightHandler = function (oldval, newval) {
     //console.log(highlightHelperCircle);
     if(highlightHelperCircle['name'] == "") return;
     
-    var selectedPath = d3.select("#cirlceSetVis").selectAll("[name="+ highlightHelperCircle.name + "]")//.selectAll("[parentName="+ highlightHelperCircle.parent + "]");
-    //var selectedPath = d3.selectAll("[name="+ highlightHelperCircle.name + "]")//.selectAll("[parentName="+ highlightHelperCircle.parent + "]");
-    //console.log(selectedPath);
-
+    var selectedPath = circleSetVis.selectAll("[name="+ highlightHelperCircle.name + "]")//.selectAll("[parentName="+ highlightHelperCircle.parent + "]");
 
     if(selectedPath.length > 0){
         for (i in selectedPath[0]) {
@@ -168,43 +202,21 @@ var intervalD2 = setInterval(watch(dragHelperCircle, "y", dragHandler), 10);
 var intervalD3 = setInterval(watch(dragHelperCircle, "drag", dragHandler), 10);
 // **************************************************
 
-// ****************** Parallel Set ******************
-var parallelSetVis = {
-    width: 700,
-    height: 500
-}
 
-var parallelSet = d3.parsets(highlightHelperCircle, highlightHelperParallel, dragHelperCircle, dragHelperParallel)
-    .dimensions(["EUcountry", "asylCountry", "gender", "age"])
-    .width(parallelSetVis.width)
-    .height(parallelSetVis.height)
-    .duration(duration);
 
-var svgParallel = d3.select('#Visualisations')
-  .append("div")
-    .attr('id', 'parallelSetVis')
-  .append("svg")
-    //.attr('x', circleSetVis.width)
-    .attr("width", parallelSet.width())
-    .attr("height", parallelSet.height());
 
-d3.csv("asyl.csv", function(csv) {
-    svgParallel.datum(csv).call(parallelSet);
-});
-// **************************************************
 
 
 // ****************** Load Data ********************
 var data;
 // load and process data
-d3.json("asyl.json", function(error, root) {
+d3.json("refugee.json", function(error, root) {
     if (error) throw error;
     partition(root);
     data = root;
     draw(root)
 });
-
-var drag = d3.behavior.drag();
+// **************************************************
 
 function draw(data, ringDepth, currentTransition)
 {  
@@ -223,7 +235,7 @@ function draw(data, ringDepth, currentTransition)
         .remove();
 
     // *********************    tooltip / infobox   ******************************** //
-    var tooltip = d3.select('.tooltip')
+    var tooltip = circleSetVis.select('.tooltip')
 
     // ********************     pie slices      ************************************** //
     var dataGroup = svgCircle.selectAll("g")
@@ -252,7 +264,7 @@ function draw(data, ringDepth, currentTransition)
     // transition
     if(typeof ringDepth !== "undefined" && typeof currentTransition !== "undefined"){
         // move to front...
-        groupSelection = d3.selectAll('.group')
+        groupSelection = circleSetVis.selectAll('.group')
             .each(function(d) {
                 var parentG = d3.select(this)
                 var path = parentG.select('path');
@@ -266,10 +278,10 @@ function draw(data, ringDepth, currentTransition)
 
         // save old pos
         var startRadius
-        d3.select("[depth=slice"+(ringDepth)+"]").each(function(d) {startRadius = d.y;});
+        circleSetVis.select("[depth=slice"+(ringDepth)+"]").each(function(d) {startRadius = d.y;});
         
         // reset to last pos of drag end
-        var ring = d3.selectAll("[depth=slice"+(ringDepth)+"]")
+        var ring = circleSetVis.selectAll("[depth=slice"+(ringDepth)+"]")
             .attr('d', function(d) {
                 d.y = currentTransition;
                 return arc(d);
@@ -397,7 +409,7 @@ function dragStart(d, simulatedY, depth, syncmode) {
     index = 0;
     if(syncmode){
         depthSelection = depth;
-        d3.select("[depth=slice"+(depthSelection)+"]").each(function(d) {startRadius = d.y;});
+        circleSetVis.select("[depth=slice"+(depthSelection)+"]").each(function(d) {startRadius = d.y;});
         currentTransition = startRadius;
     } else {
         currentTransition = d.y;
@@ -412,7 +424,7 @@ function dragStart(d, simulatedY, depth, syncmode) {
     //console.log("d: " + d + "  simulatedY:  " + simulatedY + "  depthSelection: " + depthSelection + " syncmode: " + syncmode );
 
     // move to front...
-    groupSelection = d3.selectAll('.group')
+    groupSelection = circleSetVis.selectAll('.group')
         .each(function(d) {
             var parentG = d3.select(this)
             var path = parentG.select('path');
@@ -424,8 +436,8 @@ function dragStart(d, simulatedY, depth, syncmode) {
             }
     })
 
-    sliceSelection = d3.selectAll("[depth=slice"+depthSelection+"]");
-    labelSelection = d3.selectAll("[depth=label"+depthSelection+"]");
+    sliceSelection = circleSetVis.selectAll("[depth=slice"+depthSelection+"]");
+    labelSelection = circleSetVis.selectAll("[depth=label"+depthSelection+"]");
 }
 
 function dragMove(d, simulatedY, depth, syncmode) {
@@ -481,7 +493,7 @@ function dragMove(d, simulatedY, depth, syncmode) {
         }
 
         //transitionDistance = (current) d.y + transitionDistance;
-        d3.select("[depth=slice"+(depthSelection)+"]").each(function(d) {transitionDistance += d.y;});
+        circleSetVis.select("[depth=slice"+(depthSelection)+"]").each(function(d) {transitionDistance += d.y;});
     }
     
     // get innderradius (d.y) from prev and next layer
@@ -489,8 +501,8 @@ function dragMove(d, simulatedY, depth, syncmode) {
         nextInnerR = radius, 
         innerRing = 0;
 
-    d3.select("[depth=slice"+(depthSelection-1)+"]").each(function(d) {prevInnerR = d.y;});
-    d3.select("[depth=slice"+(depthSelection+1)+"]").each(function(d) {nextInnerR = d.y;});
+    circleSetVis.select("[depth=slice"+(depthSelection-1)+"]").each(function(d) {prevInnerR = d.y;});
+    circleSetVis.select("[depth=slice"+(depthSelection+1)+"]").each(function(d) {nextInnerR = d.y;});
 
     // transform slices and labels
     if (sliceSelection.length > 0 && labelSelection.length > 0){
@@ -539,10 +551,10 @@ function dragMove(d, simulatedY, depth, syncmode) {
         transformedMousePos += mouseDY;
 
         // get new start y position.. for drag helper
-        d3.select("[depth=slice"+(depthSelection)+"]").each(function(d) {startRadius = d.y;});
+        circleSetVis.select("[depth=slice"+(depthSelection)+"]").each(function(d) {startRadius = d.y;});
         
         // move to front...
-        groupSelection = d3.selectAll('.group')
+        groupSelection = circleSetVis.selectAll('.group')
             .each(function(d) {
                 var parentG = d3.select(this)
                 var path = parentG.select('path');
@@ -554,8 +566,8 @@ function dragMove(d, simulatedY, depth, syncmode) {
                 }
             })
 
-        sliceSelection = d3.selectAll("[depth=slice"+depthSelection+"]");
-        labelSelection = d3.selectAll("[depth=label"+depthSelection+"]");
+        sliceSelection = circleSetVis.selectAll("[depth=slice"+depthSelection+"]");
+        labelSelection = circleSetVis.selectAll("[depth=label"+depthSelection+"]");
 
         skipNextScale = true;
     }
@@ -597,12 +609,12 @@ function highlight(d, ancestor, parents, childs, syncmode){
 
         
     if (ancestor){
-        var ring = d3.selectAll("[depth=slice"+d.depth+"]")
+        var ring = circleSetVis.selectAll("[depth=slice"+d.depth+"]")
             .attr('class', "slice-active");
     }
 
     if (childs) {
-        d3.select("#cirlceSetVis").selectAll("[name="+d.name+"]")
+        circleSetVis.selectAll("[name="+d.name+"]")
             .attr('class', "slice-active-p")
             .forEach(function(d) { 
                 if(d){
@@ -618,7 +630,7 @@ function highlight(d, ancestor, parents, childs, syncmode){
         highlightChilds(d)
         var parent = d;
         while(parent.depth > 0) {       
-            d3.select("[id=slice-"+(parent.id)+"]")
+            circleSetVis.select("[id=slice-"+(parent.id)+"]")
                 .attr('class', "slice-active-p");
 
             parent=parent.parent
@@ -630,17 +642,17 @@ function highlightChilds(d){
     if(d && d.children){    
         for (i in d.children){
             var currentNode = d.children[i];
-            d3.select("[id=slice-"+(currentNode.id)+"]").attr('class', "slice-active-p");
+            circleSetVis.select("[id=slice-"+(currentNode.id)+"]").attr('class', "slice-active-p");
             highlightChilds(currentNode);
         }
     }
 }
 
 function unhighlight(syncmode){
-    d3.selectAll('.slice-active')
+    circleSetVis.selectAll('.slice-active')
         .attr('class', 'slice');
 
-    d3.selectAll('.slice-active-p')
+    circleSetVis.selectAll('.slice-active-p')
         .attr('class', 'slice');
     //if(!syncmode){
         highlightHelperParallel['name'] = "";

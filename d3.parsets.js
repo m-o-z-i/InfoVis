@@ -82,7 +82,6 @@
                 node.children[d.name] = d;
               });
           tree = buildTree(tree, data, dimensions.map(dimensionName), value_);
-          //console.log(tree);
 
           cache = dimensions.map(function(d) {
             var t = {};
@@ -167,17 +166,13 @@
 
           function dragStart(d, xxx, xxx, syncmode) {
             objDrag = d;
-            console.log('dragstart');
-            console.log(objDrag);
             if (syncmode) {
               for (var i = 0; i < dimensions.length; i++) {
                 if(dimensions[i].name === "EUcountry"){
                   objDrag=dimensions[i];
-                  console.log("obj found");
-                  console.log(objDrag);
                 }
               };
-              thisDimension = d3.select("g#EUcountry")[0][0];
+              thisDimension = parallelSetVis.select("g#EUcountry")[0][0];
             } 
             else{
               var depth;
@@ -186,8 +181,6 @@
                   depth=i;
                 }
               };
-              console.log('dept'+depth);
-
               dragHelperCircle['x']=d3.event.x;
               dragHelperCircle['y']=d3.event.y;
               dragHelperCircle['depth']=depth;
@@ -206,11 +199,9 @@
               for (var i = 0; i < dimensions.length; i++) {
                 if(dimensions[i].name === "EUcountry"){
                   objDrag=dimensions[i];
-                  console.log("obj found");
-                  console.log(objDrag);
                 }
               };
-              thisDimension = d3.select("g#EUcountry")[0][0];
+              thisDimension = parallelSetVis.select("g#EUcountry")[0][0];
             }
             //if (syncmode) return; 
 
@@ -231,7 +222,7 @@
 
               var mouseTransition = startPosY + mouseDY;
 
-              console.log("mouseTransition: " + mouseTransition + "     y: " + mouseDY + "    scale(y): " + parallelScale(dragHelperParallel['y']));
+              //console.log("mouseTransition: " + mouseTransition + "     y: " + mouseDY + "    scale(y): " + parallelScale(dragHelperParallel['y']));
 
               objDrag.y0 = objDrag.y = mouseTransition;
             } else {
@@ -334,7 +325,7 @@
             if(highlightHelperParallel['name'] == "") return;
             
             //var selectedPath = d3.selectAll("[path="+ highlightHelperParallel.path + "]");
-            var selectedPath = d3.select("#parallelSetVis").selectAll("[name="+ highlightHelperParallel.name + "]");
+            var selectedPath = parallelSetVis.selectAll("[name="+ highlightHelperParallel.name + "]");
             //console.log(selectedPath);
 
             var rootNode = true;
@@ -844,7 +835,10 @@
   // dimensions.  Similar to d3.nest, except we also set the parent.
   function buildTree(root, data, dimensions, value) {
     zeroCounts(root);
+    //console.log(root);
     //console.log(data);
+    //console.log(dimensions);
+    //console.log(value);
     var n = data.length,
         nd = dimensions.length;
     for (var i = 0; i < n; i++) {
