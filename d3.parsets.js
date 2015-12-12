@@ -352,6 +352,7 @@
         };
 
         var dragHandler = function (oldval, newval) {
+            console.log(dragHelperParallel);
             if (dragHelperParallel.drag === "start"){
                 dragStart(undefined, undefined, undefined, true);
 

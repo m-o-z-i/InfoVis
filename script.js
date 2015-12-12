@@ -24,7 +24,7 @@ var vis = {
 
 //var color = d3.scale.category20c();
 var hue = d3.scale.ordinal()
-  .domain([1,0,2,3,4,5,6,7,8,9])
+  .domain([0,1,2,3,4,5,6,7,8,9])
   .range(["#1f77b4", "#ff7f0e", "#2ca02c", 
           "#d62728" , "#9467bd", "#8c564b", 
           "#e377c2" , "#7f7f7f", "#bcbd22", "#17becf"]);
@@ -106,8 +106,10 @@ var parallelSetVis = {
     height: 500
 }
 
+var dimNames = ["drag0", "drag1", "drag2", "drag3"];
+
 var parallelSet = d3.parsets(highlightHelperCircle, highlightHelperParallel, dragHelperCircle, dragHelperParallel)
-    .dimensions(["drag0", "drag1", "drag2", "drag3"])
+    .dimensions(dimNames)
     .width(parallelSetVis.width)
     .height(parallelSetVis.height)
     .duration(duration);
@@ -121,10 +123,6 @@ var svgParallel = d3.select('#Visualisations')
     .attr("height", parallelSet.height());
 
 var parallelSetVis = d3.select('#parallelSetVis');
-
-d3.csv("refugee.csv", function(csv) {
-    svgParallel.datum(csv).call(parallelSet);
-});
 // **************************************************
 
 
@@ -209,14 +207,28 @@ var intervalD3 = setInterval(watch(dragHelperCircle, "drag", dragHandler), 10);
 
 // ****************** Load Data ********************
 var data;
+
+var tempCSV;
 // load and process data
 d3.json("refugee.json", function(error, root) {
     if (error) throw error;
     partition(root);
+
+    // draw circle
     data = root;
     draw(root)
+
+    // copy data:
+    var tempData = JSON.parse(JSON.stringify(root, replacer));
+    tempCSV = convertJSONtoCSV(tempData);
+
+    // draw set
+    svgParallel.datum(tempCSV).call(parallelSet);
 });
+
+
 // **************************************************
+
 
 function draw(data, ringDepth, currentTransition)
 {  
@@ -487,7 +499,7 @@ function dragMove(d, simulatedY, depth, syncmode) {
         // compute angle between local and mouse direction --> [if 0 --> decrease scale, if 180 --> decrease scale]
         var angle = rad2deg(Math.acos(mouseDirection[0]*localDirection[0] + mouseDirection[1]*localDirection[1]))
 
-        console.log('angle'+angle);
+        //console.log('angle'+angle);
         // get direction of scala factor
         if (angle >= 90){
             transitionDistance = -transitionDistance;
@@ -944,3 +956,22 @@ function rad2deg(angle) {
     return angle * (180 /  Math.PI);
 }
 
+
+function convertJSONtoCSV(json) {
+    var csv = [];
+
+    partition.nodes(json)
+        .forEach(function(d) {
+            if (d.size) {
+                for (var i = 0; i < d.size; i++) {
+                    var obj= new Object;
+                    obj[dimNames[0]] = d.parent.parent.parent.name;
+                    obj[dimNames[1]] = d.parent.parent.name;
+                    obj[dimNames[2]] = d.parent.name;
+                    obj[dimNames[3]] = d.name;
+                    csv.push(obj);
+                };
+            };
+        });
+    return csv;
+}
