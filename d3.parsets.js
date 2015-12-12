@@ -53,6 +53,9 @@
         }
 
         var dimension;
+        var objDrag;
+        var thisDimension;
+
         function updateDimensions() {
           // Cache existing bound dimensions to preserve sort order.
           dimension = g.selectAll("g.dimension");
@@ -109,6 +112,7 @@
 
           var dEnter = dimension.enter().append("g")
               .attr("class", "dimension")
+              .attr("id", function(d) { return d.name; })
               .attr("transform", function(d) { return "translate(0," + d.y + ")"; })
               .on("mousedown.parsets", cancelEvent);
           dimension.each(function(d) {
@@ -150,38 +154,89 @@
           updateCategories(dimension);
           updateRibbons();
         }
-        
+
+          var parallelScale = d3.scale.linear().domain([0,80]).range([0,196]);
+
+          var mouseStartY = 0; 
+          var mouseDY = -1;
+          var startPosY = 0;
 
           drag.on("dragstart", dragStart)
               .on("drag", dragMove)
               .on("dragend", dragEnd);
 
-          function dragStart(d) {
-            console.log(d);
-            console.log(dimensions);
-            var depth;
-            for (var i = 0; i < dimensions.length; i++) {
-              if(dimensions[i].name === d.name){
-                depth=i;
-              }
-            };
-            console.log('dept'+depth);
+          function dragStart(d, xxx, xxx, syncmode) {
+            objDrag = d;
+            console.log('dragstart');
+            console.log(objDrag);
+            if (syncmode) {
+              for (var i = 0; i < dimensions.length; i++) {
+                if(dimensions[i].name === "EUcountry"){
+                  objDrag=dimensions[i];
+                  console.log("obj found");
+                  console.log(objDrag);
+                }
+              };
+              thisDimension = d3.select("g#EUcountry")[0][0];
+            } 
+            else{
+              var depth;
+              for (var i = 0; i < dimensions.length; i++) {
+                if(dimensions[i].name === objDrag.name){
+                  depth=i;
+                }
+              };
+              console.log('dept'+depth);
 
-            dragHelperCircle['x']=d3.event.x;
-            dragHelperCircle['y']=d3.event.y;
-            dragHelperCircle['depth']=depth;
-            dragHelperCircle['drag']="start";
+              dragHelperCircle['x']=d3.event.x;
+              dragHelperCircle['y']=d3.event.y;
+              dragHelperCircle['depth']=depth;
+              dragHelperCircle['drag']="start";
+
+              thisDimension = this;
+            }
 
             dragging = true;
-            d.y0 = d.y;
+            objDrag.y0 = objDrag.y;
+            startPosY = objDrag.y0;
           }
-          function dragMove(d) {
+          function dragMove(d, xxx, xxx, syncmode) {
+            // somehow failed to select object.. try again
+            if(!objDrag && syncmode) {
+              for (var i = 0; i < dimensions.length; i++) {
+                if(dimensions[i].name === "EUcountry"){
+                  objDrag=dimensions[i];
+                  console.log("obj found");
+                  console.log(objDrag);
+                }
+              };
+              thisDimension = d3.select("g#EUcountry")[0][0];
+            }
+            //if (syncmode) return; 
+
             //console.log(d3.event.x + "  " + d3.event.y);
-            dragHelperCircle['x']=d3.event.x;
-            dragHelperCircle['y']=d3.event.y;
-            dragHelperCircle['drag']="move";
+            if(!syncmode){
+              dragHelperCircle['x']=d3.event.x;
+              dragHelperCircle['y']=d3.event.y;
+              dragHelperCircle['drag']="move";
+            }
             
-            d.y0 = d.y = d3.event.y;
+            // mouse input
+            if (syncmode){
+              if (mouseDY === -1){
+                mouseStartY = parallelScale(dragHelperParallel['y']);
+              }
+              mouseDY = mouseStartY - parallelScale(dragHelperParallel['y']);
+              mouseDY *= -1;
+
+              var mouseTransition = startPosY + mouseDY;
+
+              console.log("mouseTransition: " + mouseTransition + "     y: " + mouseDY + "    scale(y): " + parallelScale(dragHelperParallel['y']));
+
+              objDrag.y0 = objDrag.y = mouseTransition;
+            } else {
+              objDrag.y0 = objDrag.y = d3.event.y;
+            }
 
             for (var i = 1; i < dimensions.length; i++) {
               if (height * dimensions[i].y < height * dimensions[i - 1].y) {
@@ -189,13 +244,8 @@
                 dimensionNames = dimensions.map(dimensionName);
                 ordinal.domain([]).range(d3.range(dimensions[0].categories.length));
 
-                //console.log(dimensions);
-                //console.log(dimensionNames);
-                
-                //console.log("###############################");
-                //console.log(nodes);
                 nodes = layout(tree = buildTree({children: {}, count: 0}, data, dimensionNames, value_), dimensions, ordinal);
-                //console.log(nodes);
+
                 total = getTotal(dimensions);
                 g.selectAll(".ribbon, .ribbon-mouse").selectAll("path").remove();
                 updateRibbons();
@@ -206,17 +256,25 @@
                 break;
               }
             }
-            d3.select(this)
-                .attr("transform", "translate(0," + d.y + ")")
+
+
+            d3.select(thisDimension)
+                .attr("transform", "translate(0," + objDrag.y + ")")
                 .transition();
-            ribbon.filter(function(r) { return r.source.dimension === d || r.target.dimension === d; })
+            ribbon.filter(function(r) { return r.source.dimension === objDrag || r.target.dimension === objDrag; })
                 .attr("d", ribbonPath);
           }
-          function dragEnd(d) {
-            dragHelperCircle['x']=0;
-            dragHelperCircle['y']=0;
-            dragHelperCircle['depth']=0;
-            dragHelperCircle['drag']="end";
+          function dragEnd(d, xxx, xxx, syncmode) {
+            //if (syncmode) return; 
+            if(!syncmode){
+              dragHelperCircle['x']=d3.event.x;
+              dragHelperCircle['y']=d3.event.y;
+              dragHelperCircle['depth']=0;
+              dragHelperCircle['drag']="end";
+            }
+
+            mouseDX = -1;
+            mouseDY = -1;
 
             dragging = false;
             unhighlight();
@@ -225,8 +283,9 @@
             dimensions.forEach(function(d, i) {
               d.y = y0 + i * dy;
             });
-            transition(d3.select(this))
-                .attr("transform", "translate(0," + d.y + ")")
+
+            transition(d3.select(thisDimension))
+                .attr("transform", "translate(0," + objDrag.y + ")")
                 .tween("ribbon", ribbonTweenY);
           }
 
@@ -301,12 +360,21 @@
         };
 
         var dragHandler = function (oldval, newval) {
-            console.log('drag handler parallel');
+            if (dragHelperParallel.drag === "start"){
+                dragStart(undefined, undefined, undefined, true);
+
+            } else if (dragHelperParallel.drag === "move"){
+                dragMove(undefined, undefined, undefined, true)
+
+            } else if (dragHelperParallel.drag === "end"){
+                dragEnd(undefined, undefined, undefined, true)
+            }
         }
 
         var intervalH = setInterval(watch(highlightHelperParallel, "path", highlightHandler), 100);
-        var intervalD1 = setInterval(watch(dragHelperParallel, "x", dragHandler), 100);
-        var intervalD2 = setInterval(watch(dragHelperParallel, "y", dragHandler), 100);
+        var intervalD1 = setInterval(watch(dragHelperParallel, "x", dragHandler), 1);
+        var intervalD2 = setInterval(watch(dragHelperParallel, "y", dragHandler), 1);
+        var intervalD3 = setInterval(watch(dragHelperParallel, "drag", dragHandler), 1);
         // **************************************************
 
         function sortBy(type, f, dimension) {
