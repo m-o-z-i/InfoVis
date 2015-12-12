@@ -487,8 +487,9 @@ function dragMove(d, simulatedY, depth, syncmode) {
         // compute angle between local and mouse direction --> [if 0 --> decrease scale, if 180 --> decrease scale]
         var angle = rad2deg(Math.acos(mouseDirection[0]*localDirection[0] + mouseDirection[1]*localDirection[1]))
 
+        console.log('angle'+angle);
         // get direction of scala factor
-        if (angle > 90){
+        if (angle >= 90){
             transitionDistance = -transitionDistance;
         }
 
@@ -538,7 +539,6 @@ function dragMove(d, simulatedY, depth, syncmode) {
     if (!syncmode){
         dragHelperParallel['x']=0;
         dragHelperParallel['y']=transitionDistance;
-        console.log("transdist:  " + transitionDistance);
         dragHelperParallel['depth']=depthSelection;
         dragHelperParallel['drag']="move";
     }

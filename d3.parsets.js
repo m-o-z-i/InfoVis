@@ -128,7 +128,7 @@
           textEnter.append("tspan")
               .attr("class", "name")
               .text(dimensionFormatName);
-          textEnter.append("tspan")
+/*          textEnter.append("tspan")
               .attr("class", "sort alpha")
               .attr("dx", "2em")
               .text("alpha »")
@@ -137,7 +137,7 @@
               .attr("class", "sort size")
               .attr("dx", "2em")
               .text("size »")
-              .on("mousedown.parsets", cancelEvent);
+              .on("mousedown.parsets", cancelEvent);*/
           dimension
               .call(drag);
           
@@ -521,8 +521,8 @@
                 d3.event.stopPropagation();
               })
               .on("mouseout.parsets", unhighlight)
-              .on("mousedown.parsets", cancelEvent)
-              .call(d3.behavior.drag()
+              .on("mousedown.parsets", cancelEvent);
+              /*.call(d3.behavior.drag()
                 .origin(identity)
                 .on("dragstart", function(d) {
                   dragging = true;
@@ -561,7 +561,7 @@
                   transition(d3.select(this))
                       .attr("transform", "translate(" + d.x + ")")
                       .tween("ribbon", ribbonTweenX);
-                }));
+                }));*/
           category.transition().duration(duration)
               .attr("transform", function(d) { return "translate(" + d.x + ")"; })
               .tween("ribbon", ribbonTweenX);
