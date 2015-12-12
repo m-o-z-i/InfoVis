@@ -168,11 +168,13 @@
             objDrag = d;
             if (syncmode) {
               for (var i = 0; i < dimensions.length; i++) {
-                if(dimensions[i].name === "EUcountry"){
+                console.log(dimensions[i].name.split("t").pop() +" == "+ dragHelperParallel['depth'] +"  = " + (dimensions[i].name.split("t").pop() == dragHelperParallel['depth']));
+                if(dimensions[i].name.split("t").pop() == (dragHelperParallel['depth']-1)){
                   objDrag=dimensions[i];
+                  break;
                 }
               };
-              thisDimension = parallelSetVis.select("g#EUcountry")[0][0];
+              thisDimension = parallelSetVis.select("g#t"+(dragHelperParallel['depth']-1))[0][0];
             } 
             else{
               var depth;
@@ -197,11 +199,13 @@
             // somehow failed to select object.. try again
             if(!objDrag && syncmode) {
               for (var i = 0; i < dimensions.length; i++) {
-                if(dimensions[i].name === "EUcountry"){
+                console.log(dimensions[i].name.split("t").pop() +" == "+ dragHelperParallel['depth'] +"  = " + (dimensions[i].name.split("t").pop() == dragHelperParallel['depth']));
+                if(dimensions[i].name.split("t").pop() == (dragHelperParallel['depth']-1)){
                   objDrag=dimensions[i];
+                  break;
                 }
               };
-              thisDimension = parallelSetVis.select("g#EUcountry")[0][0];
+              thisDimension = parallelSetVis.select("g#t"+(dragHelperParallel['depth']-1))[0][0];
             }
             //if (syncmode) return; 
 
@@ -279,7 +283,6 @@
                 .attr("transform", "translate(0," + objDrag.y + ")")
                 .tween("ribbon", ribbonTweenY);
           }
-
 
 
 

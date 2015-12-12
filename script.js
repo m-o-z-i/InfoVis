@@ -107,7 +107,7 @@ var parallelSetVis = {
 }
 
 var parallelSet = d3.parsets(highlightHelperCircle, highlightHelperParallel, dragHelperCircle, dragHelperParallel)
-    .dimensions(["EUcountry", "asylCountry", "gender", "age"])
+    .dimensions(["t0", "t1", "t2", "t3"])
     .width(parallelSetVis.width)
     .height(parallelSetVis.height)
     .duration(duration);
