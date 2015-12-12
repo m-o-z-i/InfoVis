@@ -127,7 +127,7 @@
               .attr("transform", "translate(0,-25)");
           textEnter.append("tspan")
               .attr("class", "name")
-              .text(dimensionFormatName);
+              .text("drag"/*dimensionFormatName*/);
 /*          textEnter.append("tspan")
               .attr("class", "sort alpha")
               .attr("dx", "2em")
@@ -168,13 +168,12 @@
             objDrag = d;
             if (syncmode) {
               for (var i = 0; i < dimensions.length; i++) {
-                console.log(dimensions[i].name.split("t").pop() +" == "+ dragHelperParallel['depth'] +"  = " + (dimensions[i].name.split("t").pop() == dragHelperParallel['depth']));
-                if(dimensions[i].name.split("t").pop() == (dragHelperParallel['depth']-1)){
+                if(dimensions[i].name.split("drag").pop() == (dragHelperParallel['depth'])){
                   objDrag=dimensions[i];
                   break;
                 }
               };
-              thisDimension = parallelSetVis.select("g#t"+(dragHelperParallel['depth']-1))[0][0];
+              thisDimension = parallelSetVis.select("g#drag"+(dragHelperParallel['depth']))[0][0];
             } 
             else{
               var depth;
@@ -199,13 +198,12 @@
             // somehow failed to select object.. try again
             if(!objDrag && syncmode) {
               for (var i = 0; i < dimensions.length; i++) {
-                console.log(dimensions[i].name.split("t").pop() +" == "+ dragHelperParallel['depth'] +"  = " + (dimensions[i].name.split("t").pop() == dragHelperParallel['depth']));
-                if(dimensions[i].name.split("t").pop() == (dragHelperParallel['depth']-1)){
+                if(dimensions[i].name.split("drag").pop() == (dragHelperParallel['depth'])){
                   objDrag=dimensions[i];
                   break;
                 }
               };
-              thisDimension = parallelSetVis.select("g#t"+(dragHelperParallel['depth']-1))[0][0];
+              thisDimension = parallelSetVis.select("g#drag"+(dragHelperParallel['depth']))[0][0];
             }
             //if (syncmode) return; 
 

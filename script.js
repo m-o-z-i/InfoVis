@@ -107,7 +107,7 @@ var parallelSetVis = {
 }
 
 var parallelSet = d3.parsets(highlightHelperCircle, highlightHelperParallel, dragHelperCircle, dragHelperParallel)
-    .dimensions(["t0", "t1", "t2", "t3"])
+    .dimensions(["drag0", "drag1", "drag2", "drag3"])
     .width(parallelSetVis.width)
     .height(parallelSetVis.height)
     .duration(duration);
@@ -417,7 +417,7 @@ function dragStart(d, simulatedY, depth, syncmode) {
 
         dragHelperParallel['x']=d3.mouse(SVGMousePos)[0];
         dragHelperParallel['y']=d3.mouse(SVGMousePos)[1];
-        dragHelperParallel['depth']=depthSelection;
+        dragHelperParallel['depth']=depthSelection-1;
         dragHelperParallel['drag']="start";
     }
 
@@ -539,7 +539,7 @@ function dragMove(d, simulatedY, depth, syncmode) {
     if (!syncmode){
         dragHelperParallel['x']=0;
         dragHelperParallel['y']=transitionDistance;
-        dragHelperParallel['depth']=depthSelection;
+        dragHelperParallel['depth']=depthSelection-1;
         dragHelperParallel['drag']="move";
     }
         
@@ -578,7 +578,7 @@ function dragEnd(d, simulatedY, depth, syncmode) {
     if(!syncmode){
         dragHelperParallel['x']=0;
         dragHelperParallel['y']=0;
-        dragHelperParallel['depth']=depthSelection;
+        dragHelperParallel['depth']=0;
         dragHelperParallel['drag']="end";
     }
 
