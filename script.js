@@ -339,8 +339,8 @@ function mouseenter(d){
 
     var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.value ;
 
-    var percent = Math.round(1000 * d.value / totalSize) / 10;
-    var parentPercent = Math.round(1000 * d.value / parentSize) / 10;
+    var percent = Math.round(1000.0 * d.value / totalSize) / 10.0;
+    var parentPercent = Math.round(1000.0 * d.value / parentSize) / 10.0;
 
     var p = d;
     var path = [];
@@ -350,9 +350,9 @@ function mouseenter(d){
     }
         
     tooltip.select('.label').html('<b>' + path.join(" → ") + '</b>' );
-    tooltip.select('.count').html('count: ' + d.value + (percent)); 
+    tooltip.select('.count').html('count: ' + d.value + " ("+percent+"%)"); 
     //tooltip.select('.percent').html('total percent: ' + percent + '%'); 
-    tooltip.select('.percent-to-parent').html('percent to parent: ' + parentPercent + '%'); 
+    tooltip.select('.percent-to-parent').html('to parent: ' + parentPercent + '%'); 
     tooltip.style('display', 'block');
 }
 

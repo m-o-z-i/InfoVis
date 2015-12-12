@@ -889,7 +889,7 @@
       if (d.name) path.unshift(d.name);
       d = d.parent;
     }
-    return '<b>' + path.join(" → ") + '</b>' + "<br>" + comma(count) + " (" + percent(count / d.count) + ")" + "<br>" + "percent to parent: " + parentPercent;
+    return '<b>' + path.join(" → ") + '</b>' + "<br>" + comma(count) + " (" + percent(count / d.count) + ")" + "<br>" + "to parent: " + parentPercent + "%";
   }
 
   function defaultCategoryTooltip(d) {
