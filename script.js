@@ -13,23 +13,15 @@ var dragHelperParallel = {x:0, y:0, depth:0, drag:""};
 
 var SVGMousePos = d3.select("#mouseSVG").node().parentElement;
 
+
 var drag = d3.behavior.drag();
 
-
-// visualisation settings
-var vis = {
-    width: 800,
-    height: 800
-}
-
-//var color = d3.scale.category20c();
+// color
 var hue = d3.scale.ordinal()
   .domain([0,1,2,3,4,5,6,7,8,9])
   .range(["#1f77b4", "#ff7f0e", "#2ca02c", 
           "#d62728" , "#9467bd", "#8c564b", 
           "#e377c2" , "#7f7f7f", "#bcbd22", "#17becf"]);
-
-//var hue = d3.scale.category10();
 var saturation = d3.scale.linear()
     .domain([1, 4])
     .clamp(true)
@@ -39,25 +31,18 @@ var lightness = d3.scale.linear()
     .clamp(true)
     .range([0.7, 0.4]);
 
-
-var radius = Math.min(vis.width, vis.height) / 2;
-var arcLength = d3.scale.linear().range([0, 2 * Math.PI]);
-var arcDistance = d3.scale.linear().range([0, radius]);
-
 var duration = 500;
 var padding = 10;
 var dragging = false;
 
 // ****************** Circle Set ********************
 // visualisation settings
-var circleSetVis = {
+var circleVis = {
     width: 600,
     height: 600
 }
 
-var radius = Math.min(circleSetVis.width, circleSetVis.height) / 2;
-var arcLength = d3.scale.linear().range([0, 2 * Math.PI]);
-var arcDistance = d3.scale.linear().range([0, radius]);
+var radius = Math.min(circleVis.width, circleVis.height) / 2;
 
 // define partition size
 var partition = d3.layout.partition()
@@ -74,17 +59,20 @@ var arc = d3.svg.arc()
 
 // define svg element, that is locatet in the middle of diagram
 var svgCircle = d3.select('#Visualisations')
+    .on("click", mouseclick)
   .append("div")
     .attr('id', 'cirlceSetVis')
+    .attr("width", circleVis.width)
+    .attr("height", circleVis.height)
   .append("svg:svg")
-    .attr("width", circleSetVis.width)
-    .attr("height", circleSetVis.height)
+    .attr('id', 'svgCircleSet')
+    .attr("width", circleVis.width)
+    .attr("height", circleVis.height)
   .append("svg:g")
-    .attr("transform", "translate(" + circleSetVis.width / 2 + "," + (circleSetVis.height / 2) + ")");
+    .attr("transform", "translate(" + circleVis.width / 2 + "," + (circleVis.height / 2) + ")");
 
 var circleSetVis = d3.select('#cirlceSetVis');
-
-
+var mouseSVG = d3.select("#cirlceSetVis").node().parentElement;
 
 // add tooltip to DOM
 var tooltip = circleSetVis
@@ -99,6 +87,54 @@ tooltip.append('div')
 tooltip.append('div')
     .attr('class', 'percent-to-parent');
 // **************************************************
+
+// **************** temp circle set *****************
+var circleVisTemp = {
+    width: 400,
+    height: 400
+}
+
+var svgCircleTemp = d3.select('#Visualisations')
+  .append("div")
+    .attr('id', 'cirlceSetVisTemp')
+    .attr("width", circleVisTemp.width)
+    .attr("height", circleVisTemp.height)
+  .append("svg:svg")
+    .attr("width", circleVisTemp.width)
+    .attr("height", circleVisTemp.height)
+  .append("svg:g")
+    .attr("transform", "translate(" + circleVisTemp.width / 2 + "," + (circleVisTemp.height / 2) + ")");
+
+var radiusTemp = Math.min(circleVisTemp.width, circleVisTemp.height) / 2;
+
+var partitionTemp = d3.layout.partition()
+    .size([2 * Math.PI, radiusTemp])
+    .value(function(d) { return d.size; });
+
+var circleSetVisTemp = d3.select('#cirlceSetVisTemp');
+var mouseSVGTemp = d3.select("#cirlceSetVisTemp").node().parentElement;
+
+
+    // add tooltip to DOM
+var tooltipTemp = circleSetVisTemp
+    .append('div')
+    .attr('class', 'tooltipCircleTemp');
+tooltipTemp.append('div')
+    .attr('class', 'label');
+tooltipTemp.append('div')
+    .attr('class', 'count');
+tooltipTemp.append('div')
+    .attr('class', 'percent');
+tooltipTemp.append('div')
+    .attr('class', 'percent-to-parent');
+
+// **************************************************
+var overlyingVis = false;
+var currentPartition = partition;
+var currentSVGElement = svgCircle;
+var currentTooltip = tooltip;
+
+
 
 // ****************** Parallel Set ******************
 var parallelSetVis = {
@@ -201,12 +237,9 @@ var intervalD3 = setInterval(watch(dragHelperCircle, "drag", dragHandler), 10);
 // **************************************************
 
 
-
-
-
-
 // ****************** Load Data ********************
 var data;
+var overlyingData = data;
 
 var tempCSV;
 // load and process data
@@ -236,22 +269,20 @@ function draw(data, ringDepth, currentTransition)
 
     // max depth 10
     var counter = [0,0,0,0,0,0,0,0,0,0];
-    partition.nodes(data).forEach(function(d,i) {
+    currentPartition.nodes(data).forEach(function(d,i) {
         d.colorID = counter[d.depth];
         d.id = i;
         ++counter[d.depth];
     });
 
+
     // remove all
-    var toRemove = svgCircle.selectAll("g")
+    var toRemove = currentSVGElement.selectAll("g")
         .remove();
 
-    // *********************    tooltip / infobox   ******************************** //
-    var tooltip = circleSetVis.select('.tooltip')
-
     // ********************     pie slices      ************************************** //
-    var dataGroup = svgCircle.selectAll("g")
-        .data(partition(data)/*, function(d, i) { return i; }*/);
+    var dataGroup = currentSVGElement.selectAll("g")
+        .data(currentPartition(data)/*, function(d, i) { return i; }*/);
     
     var newGroupes = dataGroup.enter()
         .append("svg:g")
@@ -265,9 +296,12 @@ function draw(data, ringDepth, currentTransition)
         .attr("name", function(d) { return d.name; })
         .attr("parentName", function(d) { return (d.parent) ? d.parent.name : "" ; })
         .attr("d", arc)
-        .style("fill", function(d) { return fill(d); })
+        .style("fill", function(d, i) { 
+            if(i==0) return "white";
+            else return fill(d); 
+        })
         .attr("fill-rule", "evenodd")
-        .attr('display', function(d, i) {if(i==0) return "none";})
+        //.attr('display', function(d, i) {if(i==0) return "none";})
         .call(drag)
         .on('mouseenter', mouseenter)
         .on('mousemove', mousemove)
@@ -360,30 +394,112 @@ function mouseenter(d){
         path.unshift(p.name)
         p = p.parent;
     }
-        
-    tooltip.select('.label').html('<b>' + path.join(" → ") + '</b>' );
-    tooltip.select('.count').html('count: ' + d.value + " ("+percent+"%)"); 
-    //tooltip.select('.percent').html('total percent: ' + percent + '%'); 
-    tooltip.select('.percent-to-parent').html('to parent: ' + parentPercent + '%'); 
-    tooltip.style('display', 'block');
+     
+    // *********************    tooltip / infobox   ******************************** //
+    currentTooltip.select('.label').html('<b>' + path.join(" → ") + '</b>' );
+    currentTooltip.select('.count').html('count: ' + d.value + " ("+percent+"%)"); 
+    //currentTooltip.select('.percent').html('total percent: ' + percent + '%'); 
+    currentTooltip.select('.percent-to-parent').html('to parent: ' + parentPercent + '%'); 
+    currentTooltip.style('display', 'block');
 }
 
 function mousemove(d){
     if (dragging)  {
-        tooltip.style('display', 'none');
+        currentTooltip.style('display', 'none');
         return
     }
-    tooltip.style('left', (d3.event.pageX + 2) + 'px')
-           .style('top', (d3.event.pageY + 2) + 'px');
+
+    console.log('svg:     ' + d3.mouse(mouseSVG)[0] +", " + d3.mouse(mouseSVG)[1]);
+    console.log('svgTemp: ' + d3.mouse(mouseSVGTemp)[0] +", " + d3.mouse(mouseSVGTemp)[1]);
+    console.log('page:    ' + d3.event.pageX +", " + d3.event.pageY);
+
+
+    if (overlyingVis){
+        var offset = circleSetVisTemp[0][0].getBoundingClientRect()
+        currentTooltip
+            .style('left', (d3.mouse(mouseSVG)[0]-offset.left + 10) + 'px')
+            .style('top', (d3.mouse(mouseSVG)[1]-offset.top + 10) + 'px');
+
+    } else {
+        currentTooltip
+            .style('left', (d3.mouse(mouseSVG)[0] + 10) + 'px')
+            .style('top', (d3.mouse(mouseSVG)[1] + 10) + 'px');
+    }
+
 }
 
 function mouseleave(d){
     if (dragging) return;
     unhighlight();
-    tooltip.style('display', 'none');
+    currentTooltip.style('display', 'none');
 
     highlightHelperCircle['name']=d.name;
 }
+
+function resetVis() {
+    console.log('reset vis');
+    currentSVGElement = svgCircle;
+    currentPartition = partition;
+    currentTooltip = tooltip;
+    circleSetVisTemp
+        .attr('pointer-events', "none")
+        .style('display', 'none')
+        .style('opacity', "0.0");
+
+    circleSetVis
+        .attr('pointer-events', "")
+        .style('opacity', "1.0");
+
+    overlyingVis = false;
+    draw(data);
+}
+
+function setOverlyingVis() {
+    console.log('set overlying vis');
+    currentSVGElement = svgCircleTemp;
+    currentPartition = partitionTemp;
+    currentTooltip = tooltipTemp;
+
+    svgCircle.selectAll("path")
+        .attr("class", "slice-inactiv")
+        .style("fill", "grey")
+
+    tooltip.style('display', "none")
+    
+    
+    circleSetVis
+        .attr('pointer-events', "none")
+        .style('opacity', "0.2");
+
+    circleSetVisTemp
+        .attr('pointer-events', "")
+        .style('display', 'block')
+        .style('opacity', "1.0")
+        .style('left', (d3.mouse(mouseSVG)[0]-radiusTemp) + 'px')
+        .style('top', (d3.mouse(mouseSVG)[1]-radiusTemp) + 'px');
+
+    overlyingVis = true;
+    draw(overlyingData, 0, 0, true);
+}
+
+function mouseclick(d){
+    if(typeof(d) === "undefined"){
+        if(overlyingVis) {
+           resetVis();
+        }
+    } else {
+        if (!overlyingVis){
+            if(!d.children) return;
+
+            var dCopy = JSON.parse(JSON.stringify(d, replacer));
+            overlyingData = dCopy;
+            setOverlyingVis();
+        } else {
+            resetVis();
+        }
+    }
+}
+
 
 
 
@@ -391,7 +507,7 @@ function mouseleave(d){
 var depthSelection = 0;
 var skipNextScale = false;
 
-var index = 0;
+var dragIndex = 0;
 
 var mouseStartY = -1;
 var startRadius = 0;
@@ -417,26 +533,28 @@ function dragStart(d, simulatedY, depth, syncmode) {
     changedDepth = 0;
     changedScale = 0;
     transformedMousePos = 0;
+    dragIndex = 0;
 
-    index = 0;
     if(syncmode){
         depthSelection = depth;
-        circleSetVis.select("[depth=slice"+(depthSelection)+"]").each(function(d) {startRadius = d.y;});
+        currentSVGElement.select("[depth=slice"+(depthSelection)+"]").each(function(d) {startRadius = d.y;});
         currentTransition = startRadius;
     } else {
         currentTransition = d.y;
         depthSelection = d.depth;
 
-        dragHelperParallel['x']=d3.mouse(SVGMousePos)[0];
-        dragHelperParallel['y']=d3.mouse(SVGMousePos)[1];
-        dragHelperParallel['depth']=depthSelection-1;
-        dragHelperParallel['drag']="start";
+        if(!overlyingVis){
+            dragHelperParallel['x']=d3.mouse(SVGMousePos)[0];
+            dragHelperParallel['y']=d3.mouse(SVGMousePos)[1];
+            dragHelperParallel['depth']=depthSelection-1;
+            dragHelperParallel['drag']="start";
+        }
     }
 
     //console.log("d: " + d + "  simulatedY:  " + simulatedY + "  depthSelection: " + depthSelection + " syncmode: " + syncmode );
 
     // move to front...
-    groupSelection = circleSetVis.selectAll('.group')
+    groupSelection = currentSVGElement.selectAll('.group')
         .each(function(d) {
             var parentG = d3.select(this)
             var path = parentG.select('path');
@@ -448,8 +566,8 @@ function dragStart(d, simulatedY, depth, syncmode) {
             }
     })
 
-    sliceSelection = circleSetVis.selectAll("[depth=slice"+depthSelection+"]");
-    labelSelection = circleSetVis.selectAll("[depth=label"+depthSelection+"]");
+    sliceSelection = currentSVGElement.selectAll("[depth=slice"+depthSelection+"]");
+    labelSelection = currentSVGElement.selectAll("[depth=label"+depthSelection+"]");
 }
 
 function dragMove(d, simulatedY, depth, syncmode) {
@@ -506,7 +624,7 @@ function dragMove(d, simulatedY, depth, syncmode) {
         }
 
         //transitionDistance = (current) d.y + transitionDistance;
-        circleSetVis.select("[depth=slice"+(depthSelection)+"]").each(function(d) {transitionDistance += d.y;});
+        currentSVGElement.select("[depth=slice"+(depthSelection)+"]").each(function(d) {transitionDistance += d.y;});
     }
     
     // get innderradius (d.y) from prev and next layer
@@ -514,8 +632,8 @@ function dragMove(d, simulatedY, depth, syncmode) {
         nextInnerR = radius, 
         innerRing = 0;
 
-    circleSetVis.select("[depth=slice"+(depthSelection-1)+"]").each(function(d) {prevInnerR = d.y;});
-    circleSetVis.select("[depth=slice"+(depthSelection+1)+"]").each(function(d) {nextInnerR = d.y;});
+    currentSVGElement.select("[depth=slice"+(depthSelection-1)+"]").each(function(d) {prevInnerR = d.y;});
+    currentSVGElement.select("[depth=slice"+(depthSelection+1)+"]").each(function(d) {nextInnerR = d.y;});
 
     // transform slices and labels
     if (sliceSelection.length > 0 && labelSelection.length > 0){
@@ -548,7 +666,7 @@ function dragMove(d, simulatedY, depth, syncmode) {
             });
     }
 
-    if (!syncmode){
+    if (!syncmode && !overlyingVis){
         dragHelperParallel['x']=0;
         dragHelperParallel['y']=transitionDistance;
         dragHelperParallel['depth']=depthSelection-1;
@@ -557,16 +675,24 @@ function dragMove(d, simulatedY, depth, syncmode) {
         
     if (transformed){
         // draw data
-        data = transformTree(data, innerRing);
-        draw(data, changedDepth, changedScale);
+
+        if(overlyingVis){
+            overlyingData = transformTree(overlyingData, innerRing);
+            draw(overlyingData, changedDepth, changedScale);
+        } else {
+            data = transformTree(data, innerRing);
+            draw(data, changedDepth, changedScale);
+        }
+
+
 
         transformedMousePos += mouseDY;
 
         // get new start y position.. for drag helper
-        circleSetVis.select("[depth=slice"+(depthSelection)+"]").each(function(d) {startRadius = d.y;});
+        currentSVGElement.select("[depth=slice"+(depthSelection)+"]").each(function(d) {startRadius = d.y;});
         
         // move to front...
-        groupSelection = circleSetVis.selectAll('.group')
+        groupSelection = currentSVGElement.selectAll('.group')
             .each(function(d) {
                 var parentG = d3.select(this)
                 var path = parentG.select('path');
@@ -578,20 +704,32 @@ function dragMove(d, simulatedY, depth, syncmode) {
                 }
             })
 
-        sliceSelection = circleSetVis.selectAll("[depth=slice"+depthSelection+"]");
-        labelSelection = circleSetVis.selectAll("[depth=label"+depthSelection+"]");
+        sliceSelection = currentSVGElement.selectAll("[depth=slice"+depthSelection+"]");
+        labelSelection = currentSVGElement.selectAll("[depth=label"+depthSelection+"]");
 
         skipNextScale = true;
     }
-    ++index;
+    ++dragIndex;
 }
 
 function dragEnd(d, simulatedY, depth, syncmode) {
-    if(!syncmode){
+    if(!syncmode && !overlyingVis){
         dragHelperParallel['x']=0;
         dragHelperParallel['y']=0;
         dragHelperParallel['depth']=0;
         dragHelperParallel['drag']="end";
+    }
+    console.log('index: ' + dragIndex);
+    if(dragIndex > 0){
+        if(overlyingVis){
+            draw(overlyingData, depthSelection, currentTransition); 
+        } else {
+            draw(data, depthSelection, currentTransition); 
+        }
+
+
+    } else if(!syncmode){
+        mouseclick(d);
     }
 
     mouseStartY = -1;
@@ -599,7 +737,6 @@ function dragEnd(d, simulatedY, depth, syncmode) {
     transformedMousePos = 0;
     dragging = false;
 
-    draw(data, depthSelection, currentTransition);
 }
 // ***************************************************************************** //
 // ############################################################################# //
@@ -613,7 +750,7 @@ function highlight(d, ancestor, parents, childs, syncmode){
     }
     //console.log('highlight');
 
-    if(!syncmode){
+    if(!syncmode && !overlyingVis){
         highlightHelperParallel['name'] = d.name;
         highlightHelperParallel['path'] = path.join("");
         highlightHelperParallel['parents'] = true;
@@ -621,12 +758,12 @@ function highlight(d, ancestor, parents, childs, syncmode){
 
         
     if (ancestor){
-        var ring = circleSetVis.selectAll("[depth=slice"+d.depth+"]")
+        var ring = currentSVGElement.selectAll("[depth=slice"+d.depth+"]")
             .attr('class', "slice-active");
     }
 
     if (childs) {
-        circleSetVis.selectAll("[name="+d.name+"]")
+        currentSVGElement.selectAll("[name="+d.name+"]")
             .attr('class', "slice-active-p")
             .forEach(function(d) { 
                 if(d){
@@ -642,7 +779,7 @@ function highlight(d, ancestor, parents, childs, syncmode){
         highlightChilds(d)
         var parent = d;
         while(parent.depth > 0) {       
-            circleSetVis.select("[id=slice-"+(parent.id)+"]")
+            currentSVGElement.select("[id=slice-"+(parent.id)+"]")
                 .attr('class', "slice-active-p");
 
             parent=parent.parent
@@ -654,17 +791,17 @@ function highlightChilds(d){
     if(d && d.children){    
         for (i in d.children){
             var currentNode = d.children[i];
-            circleSetVis.select("[id=slice-"+(currentNode.id)+"]").attr('class', "slice-active-p");
+            currentSVGElement.select("[id=slice-"+(currentNode.id)+"]").attr('class', "slice-active-p");
             highlightChilds(currentNode);
         }
     }
 }
 
 function unhighlight(syncmode){
-    circleSetVis.selectAll('.slice-active')
+    currentSVGElement.selectAll('.slice-active')
         .attr('class', 'slice');
 
-    circleSetVis.selectAll('.slice-active-p')
+    currentSVGElement.selectAll('.slice-active-p')
         .attr('class', 'slice');
     //if(!syncmode){
         highlightHelperParallel['name'] = "";
@@ -700,12 +837,14 @@ function fill(d) {
 
 
 
+function getTree(d) {
 
+}
 
 
 function transformTree(d, innerRing){
 
-    console.log('transform tree');
+    //console.log('transform tree');
     var depth1 = innerRing;
 
     var root = d;
@@ -890,7 +1029,7 @@ function getNodes(root, depth){
 
 function resetData(root) {
     var sum = 0;
-    partition.nodes(root)
+    currentPartition.nodes(root)
         .forEach(function(d) {
             d.value = 0;
             d.depth = 0;
@@ -901,7 +1040,7 @@ function resetData(root) {
                 sum+=d.size;
             };
         });
-    partition(root);
+    currentPartition(root);
 }
 
 
@@ -960,7 +1099,7 @@ function rad2deg(angle) {
 function convertJSONtoCSV(json) {
     var csv = [];
 
-    partition.nodes(json)
+    currentPartition.nodes(json)
         .forEach(function(d) {
             if (d.size) {
                 for (var i = 0; i < d.size; i++) {

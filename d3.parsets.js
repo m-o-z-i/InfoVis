@@ -169,7 +169,7 @@
             if (syncmode) {
               var sel = parallelSetVis.selectAll("g[depth=d"+ dragHelperParallel['depth'] +"]");
               objDrag = sel[0][0].__data__;
-              console.log(objDrag);
+              //console.log(objDrag);
               thisDimension = parallelSetVis.select("g[depth=d"+ dragHelperParallel['depth'] +"]")[0][0];
             } 
             else{
