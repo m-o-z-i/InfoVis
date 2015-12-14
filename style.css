@@ -5,6 +5,25 @@
   text-anchor: middle;
 }
 
+h1 {
+  color: #333;
+  font-size: 26px;
+  text-align: center;
+  text-anchor: middle;
+}
+
+h2 {
+  color: #333;
+  font-size: 21px;
+  text-align: center;
+  text-anchor: middle;
+}
+
+div.VisTitle {
+  background-color: grey ;
+  margin-bottom: 100px
+}
+
 .title {
   color: #333;
   font-size: 20px;
@@ -13,8 +32,8 @@
 }
 
 .slice {
-  stroke: #fff;
-  stroke-width: 5;
+  stroke: white;
+  stroke-width: 2;
   fill-opacity: 0.5;
   fill-rule: evenodd;
 }
@@ -35,15 +54,15 @@
 }
 
 .slice-active {
-  stroke: #fff;
-  stroke-width: 5;
+  stroke: white;
+  stroke-width: 2;
   fill-opacity: 0.75;
   fill-rule: evenodd;
 }
 
 .slice-active-p {
-  stroke: #fff;
-  stroke-width: 5;
+  stroke: white;
+  stroke-width: 2;
   fill-opacity: 1;
   fill-rule: evenodd;
 }

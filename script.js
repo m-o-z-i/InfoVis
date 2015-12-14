@@ -13,11 +13,17 @@ var dragHelperParallel = {x:0, y:0, depth:0, drag:""};
 var drag = d3.behavior.drag();
 
 // color
-var hue = d3.scale.ordinal()
+var hue = d3.scale.category10();
+/*var hue = d3.scale.ordinal()
   .domain([0,1,2,3,4,5,6,7,8,9])
-  .range(["#1f77b4", "#ff7f0e", "#2ca02c", 
-          "#d62728" , "#9467bd", "#8c564b", 
-          "#e377c2" , "#7f7f7f", "#bcbd22", "#17becf"]);
+  .range(["#3366cc", "#dc3912", "#ff9900", 
+          "#109618", "#990099", "#0099c6", 
+          "#dd4477", "#66aa00", "#b82e2e", 
+          "#316395", "#994499", "#22aa99", 
+          "#aaaa11", "#6633cc", "#e67300", 
+          "#8b0707", "#651067", "#329262", 
+          "#5574a6", "#3b3eac"]);*/
+
 var saturation = d3.scale.linear()
     .domain([1, 4])
     .clamp(true)
@@ -134,11 +140,18 @@ var currentRadius = radius;
 
 // ****************** Parallel Set ******************
 var parallelSetVis = {
-    width: 700,
-    height: 500
+    width: 600,
+    height: 600
 }
 
 var dimNames = ["EU country", "foreign country", "sex", "age"];
+
+var distCircle = currentRadius / (dimNames.length+1);
+          console.log(distCircle);
+
+var distParallel = (parallelSetVis.height - 47)/3;
+
+cirlceScale = d3.scale.linear().domain([0,distParallel]).range([0,distCircle]);
 
 var parallelSet = d3.parsets(highlightHelperCircle, highlightHelperParallel, dragHelperCircle, dragHelperParallel)
     .dimensions(dimNames)
@@ -260,6 +273,7 @@ d3.json("refugee.json", function(error, root) {
 
 function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
 {  
+    console.log('draw');
     // max depth 10
     var counter = [0,0,0,0,0,0,0,0,0,0];
     currentPartition.nodes(data).forEach(function(d,i) {
@@ -431,6 +445,12 @@ function mouseenter(d){
     currentTooltip.style('display', 'inline-block');
 }
 
+var titleOffset = d3.select(".VisTitle")[0][0].getBoundingClientRect()
+console.log(titleOffset);
+var margin_top = document.getElementById("Visualisations").offsetTop;
+console.log(margin_top.offsetTop);
+titleOffset = margin_top /*margin*/;
+
 function mousemove(d){
     if (dragging)  {
         currentTooltip.style('display', 'none');
@@ -440,13 +460,13 @@ function mousemove(d){
     if (overlyingVis){
         var offset = circleSetVisTemp[0][0].getBoundingClientRect()
         currentTooltip
-            .style('left', (d3.mouse(mouseSVG)[0]-offset.left + 10) + 'px')
-            .style('top', (d3.mouse(mouseSVG)[1]-offset.top + 10) + 'px');
+            .style('left', (d3.event.pageX + 10) + 'px')
+            .style('top', (d3.event.pageY + 10) + 'px');
 
     } else {
         currentTooltip
-            .style('left', (d3.mouse(mouseSVG)[0] + 10) + 'px')
-            .style('top', (d3.mouse(mouseSVG)[1] + 10) + 'px');
+            .style('left', (d3.event.pageX + 10) + 'px')
+            .style('top', (d3.event.pageY + 10) + 'px');
     }
 
 }
@@ -498,8 +518,8 @@ function setOverlyingVis() {
         .attr('pointer-events', "")
         .style('display', 'block')
         .style('opacity', "1.0")
-        .style('left', (d3.mouse(mouseSVG)[0]-radiusTemp) + 'px')
-        .style('top', (d3.mouse(mouseSVG)[1]-radiusTemp) + 'px');
+        .style('left', (d3.mouse(mouseSVG)[0] -radiusTemp) + 'px')
+        .style('top', (d3.mouse(mouseSVG)[1] + titleOffset -radiusTemp) + 'px');
 
     overlyingVis = true;
     draw(overlyingData, 0, 0, true);
@@ -554,8 +574,6 @@ var currentTransition = 0;
 var changedDepth = 0;
 var changedScale = 0;
 
-cirlceScale = d3.scale.linear().domain([0,196]).range([0,80]);
-
 var groupSelection, sliceSelection, labelSelection;
 drag.on("dragstart", dragStart)
     .on("drag", dragMove)
@@ -567,6 +585,8 @@ function dragStart(d, simulatedY, depth, syncmode) {
     changedScale = 0;
     transformedMousePos = 0;
     dragIndex = 0;
+
+    unhighlight();
 
     if(syncmode){
         depthSelection = depth;
@@ -709,6 +729,8 @@ function dragMove(d, simulatedY, depth, syncmode) {
         dragHelperParallel['drag']="move";
     }
         
+    unhighlight();
+
     if (transformed){
         // draw data
 
@@ -719,7 +741,6 @@ function dragMove(d, simulatedY, depth, syncmode) {
             data = transformTree(data, innerRing);
             draw(data, changedDepth, changedScale);
         }
-
 
 
         transformedMousePos += mouseDY;
@@ -855,16 +876,6 @@ function fill(d) {
 
   return c;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

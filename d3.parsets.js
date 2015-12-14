@@ -154,7 +154,7 @@
           updateRibbons();
         }
 
-          var parallelScale = d3.scale.linear().domain([0,80]).range([0,196]);
+          var parallelScale = d3.scale.linear().domain([0,distCircle]).range([0, distParallel]);
 
           var mouseStartY = 0; 
           var mouseDY = -1;
@@ -192,13 +192,14 @@
             startPosY = objDrag.y0;
           }
           function dragMove(d, xxx, xxx, syncmode) {
+
+
             // somehow failed to select object.. try again
             if(!objDrag && syncmode) {
               var sel = parallelSetVis.select("g[depth=d"+ dragHelperParallel['depth'] +"]");
               objDrag = sel[0][0].__data__;
               thisDimension = parallelSetVis.select("g[depth=d"+ dragHelperParallel['depth'] +"]")[0][0];
             }
-            //if (syncmode) return; 
 
             //console.log(d3.event.x + "  " + d3.event.y);
             if(!syncmode){
@@ -210,9 +211,9 @@
             // mouse input
             if (syncmode){
               if (mouseDY === -1){
-                mouseStartY = parallelScale(dragHelperParallel['y']);
+                mouseStartY = dragHelperParallel['y'];
               }
-              mouseDY = mouseStartY - parallelScale(dragHelperParallel['y']);
+              mouseDY = parallelScale(mouseStartY - dragHelperParallel['y']);
               mouseDY *= -1;
 
               var mouseTransition = startPosY + mouseDY;
@@ -221,6 +222,7 @@
 
               objDrag.y0 = objDrag.y = mouseTransition;
             } else {
+              //console.dir(d3.event.y);
               objDrag.y0 = objDrag.y = d3.event.y;
             }
 
@@ -384,6 +386,7 @@
                 d.target.x0 = d.target.x;
               })
               .attr("class", function(d) { return "category-" + d.major; })
+              .attr('fill', function(d) {return hue(d.major);})
               .attr("name", function(d) { return d.name;})
               .attr("path", function(d) { return d.path;})
               .attr("d", ribbonPath);
@@ -658,8 +661,8 @@
       var m = d3.mouse(body.node());
       tooltip
           .style("display", null)
-          .style("left", m[0] + 30 + "px")
-          .style("top", m[1] - 20 + "px")
+          .style("left", m[0] + 15 + "px")
+          .style("top", m[1] + 20 + "px")
           .html(html);
     }
 
