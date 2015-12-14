@@ -409,7 +409,7 @@ function mouseenter(d){
     // get total size
     var totalSize = data.value;
 
-    highlight(d, true, true);
+    highlight(d, false, true);
 
     var parentSize = (typeof d.parent == "undefined") ? d.value : d.parent.value ;
 
