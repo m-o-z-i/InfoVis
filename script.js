@@ -375,15 +375,12 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
             else if (i != 0) return d.name;
         });
 
-    var rootLabel = d3.selectAll("#title");
+    var rootLabel = currentSVGElement.select("text.title");
     console.log(rootLabel);
-    rootLabel = newLabel;
 
     if (overlyingVis){
         var diff = overlyingVisParentNames.length/2.0;
-        overlyingVisParentNames.reverse()
         overlyingVisParentNames.forEach(function (name, index) {
-            console.log('name: '+name);
             rootLabel.append("tspan")
                 .attr("x", 0)
                 .attr('y', (diff-index)+"em")
@@ -393,19 +390,19 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
                 .attr('padding-top', "100px")
                 .attr("x", 0)
                 .attr('y', (((diff-index)*21)-10)+"px")
-                .text(function(d, i) { if (i==0 && index < overlyingVisParentNames.length-1) return "▾";});
+                .text(function(d, i) { if (index < overlyingVisParentNames.length-1) return "▾";});
         })
         // for root node 
         rootLabel.append("tspan")
         .attr("x", 0)
         .attr("dy", (overlyingVisParentNames.length)+"em")
-        .text(function(d, i) { if (i==0) return d.value; });
+        .text(function(d, i) { return d.value; });
     } else {
         // for root node 
         rootLabel.append("tspan")
             .attr("x", 0)
             .attr("dy", "1em")
-            .text(function(d, i) { if (i==0) return d.value; });
+            .text(function(d, i) { return d.value; });
     }
 
     // ***************************************************************************** //
@@ -533,6 +530,7 @@ function mouseclick(d){
                 overlyingVisParentNames.unshift(p.name)
                 p = p.parent;
             }
+            overlyingVisParentNames.reverse()
 
             setOverlyingVis();
         } else {
