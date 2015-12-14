@@ -10,10 +10,6 @@ var highlightHelperParallel = {name:"", path:"", parents:true};
 var dragHelperCircle = {x:0, y:0, depth:0, drag:""};
 var dragHelperParallel = {x:0, y:0, depth:0, drag:""};
 
-
-var SVGMousePos = d3.select("#mouseSVG").node().parentElement;
-
-
 var drag = d3.behavior.drag();
 
 // color
@@ -112,8 +108,6 @@ var partitionTemp = d3.layout.partition()
     .value(function(d) { return d.size; });
 
 var circleSetVisTemp = d3.select('#cirlceSetVisTemp');
-var mouseSVGTemp = d3.select("#cirlceSetVisTemp").node().parentElement;
-
 
     // add tooltip to DOM
 var tooltipTemp = circleSetVisTemp
@@ -133,6 +127,7 @@ var overlyingVis = false;
 var currentPartition = partition;
 var currentSVGElement = svgCircle;
 var currentTooltip = tooltip;
+var currentRadius = radius;
 
 
 
@@ -409,11 +404,6 @@ function mousemove(d){
         return
     }
 
-    console.log('svg:     ' + d3.mouse(mouseSVG)[0] +", " + d3.mouse(mouseSVG)[1]);
-    console.log('svgTemp: ' + d3.mouse(mouseSVGTemp)[0] +", " + d3.mouse(mouseSVGTemp)[1]);
-    console.log('page:    ' + d3.event.pageX +", " + d3.event.pageY);
-
-
     if (overlyingVis){
         var offset = circleSetVisTemp[0][0].getBoundingClientRect()
         currentTooltip
@@ -441,6 +431,7 @@ function resetVis() {
     currentSVGElement = svgCircle;
     currentPartition = partition;
     currentTooltip = tooltip;
+    currentRadius = radius;
     circleSetVisTemp
         .attr('pointer-events', "none")
         .style('display', 'none')
@@ -459,6 +450,7 @@ function setOverlyingVis() {
     currentSVGElement = svgCircleTemp;
     currentPartition = partitionTemp;
     currentTooltip = tooltipTemp;
+    currentRadius = radiusTemp;
 
     svgCircle.selectAll("path")
         .attr("class", "slice-inactiv")
@@ -544,8 +536,8 @@ function dragStart(d, simulatedY, depth, syncmode) {
         depthSelection = d.depth;
 
         if(!overlyingVis){
-            dragHelperParallel['x']=d3.mouse(SVGMousePos)[0];
-            dragHelperParallel['y']=d3.mouse(SVGMousePos)[1];
+            dragHelperParallel['x']=d3.mouse(mouseSVG)[0];
+            dragHelperParallel['y']=d3.mouse(mouseSVG)[1];
             dragHelperParallel['depth']=depthSelection-1;
             dragHelperParallel['drag']="start";
         }
@@ -629,17 +621,20 @@ function dragMove(d, simulatedY, depth, syncmode) {
     
     // get innderradius (d.y) from prev and next layer
     var prevInnerR = 0, 
-        nextInnerR = radius, 
+        nextInnerR = currentRadius, 
         innerRing = 0;
 
     currentSVGElement.select("[depth=slice"+(depthSelection-1)+"]").each(function(d) {prevInnerR = d.y;});
     currentSVGElement.select("[depth=slice"+(depthSelection+1)+"]").each(function(d) {nextInnerR = d.y;});
 
+    var min = currentRadius/10;
+    var max = currentRadius - min;
+
     // transform slices and labels
     if (sliceSelection.length > 0 && labelSelection.length > 0){
         sliceSelection
             .attr('d',  function(d,i){
-                if (transitionDistance > 50 && transitionDistance < radius-50){
+                if (transitionDistance > min && transitionDistance < max){
                     d.y = transitionDistance
                     currentTransition = transitionDistance;
                 }
@@ -719,7 +714,6 @@ function dragEnd(d, simulatedY, depth, syncmode) {
         dragHelperParallel['depth']=0;
         dragHelperParallel['drag']="end";
     }
-    console.log('index: ' + dragIndex);
     if(dragIndex > 0){
         if(overlyingVis){
             draw(overlyingData, depthSelection, currentTransition); 
