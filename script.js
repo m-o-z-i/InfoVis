@@ -258,7 +258,7 @@ d3.json("refugee.json", function(error, root) {
 // **************************************************
 
 
-function draw(data, ringDepth, currentTransition)
+function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
 {  
     console.log('draw');
 
@@ -334,6 +334,14 @@ function draw(data, ringDepth, currentTransition)
                 d.y = startRadius;
                 return arc(d);
             });
+    }
+
+    if(transitionOverlyingCirlce){
+        currentSVGElement
+            .attr('transform', "translate(" + circleVisTemp.width / 2 + "," + (circleVisTemp.height / 2) + ")scale(.2)")
+
+        currentSVGElement.transition().duration(200)
+            .attr('transform', "translate(" + circleVisTemp.width / 2 + "," + (circleVisTemp.height / 2) + ")scale(1)")
     }
 
 
@@ -434,8 +442,7 @@ function resetVis() {
     currentRadius = radius;
     circleSetVisTemp
         .attr('pointer-events', "none")
-        .style('display', 'none')
-        .style('opacity', "0.0");
+        .style('display', 'none');
 
     circleSetVis
         .attr('pointer-events', "")
@@ -461,7 +468,7 @@ function setOverlyingVis() {
     
     circleSetVis
         .attr('pointer-events', "none")
-        .style('opacity', "0.2");
+        .style('opacity', "0.1");
 
     circleSetVisTemp
         .attr('pointer-events', "")
