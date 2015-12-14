@@ -7,7 +7,7 @@
 
 .title {
   color: #333;
-  font-size: 21px;
+  font-size: 20px;
   text-align: center;
   text-anchor: middle;
 }
@@ -101,4 +101,11 @@
 
     position: absolute;
     width: 100%;
+}
+
+.childArrows {
+  font-size: 17px;
+  margin-top: 100em;
+  text-align: center;
+  text-anchor: middle;
 }

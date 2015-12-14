@@ -124,6 +124,7 @@ tooltipTemp.append('div')
 
 // **************************************************
 var overlyingVis = false;
+var overlyingVisParentNames = [];
 var currentPartition = partition;
 var currentSVGElement = svgCircle;
 var currentTooltip = tooltip;
@@ -369,13 +370,44 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
             var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
             if (i != 0) { return "translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
         }})
-        .text(function(d) { return d.name; });
+        .text(function(d, i) { 
+            if(!overlyingVis)return d.name;
+            else if (i != 0) return d.name;
+        });
 
-    // for root node 
-    newLabel.append("tspan")
+    var rootLabel = d3.selectAll("#title");
+    console.log(rootLabel);
+    rootLabel = newLabel;
+
+    if (overlyingVis){
+        var diff = overlyingVisParentNames.length/2.0;
+        overlyingVisParentNames.reverse()
+        overlyingVisParentNames.forEach(function (name, index) {
+            console.log('name: '+name);
+            rootLabel.append("tspan")
+                .attr("x", 0)
+                .attr('y', (diff-index)+"em")
+                .text(function(d, i) { if (i==0) return overlyingVisParentNames[index]; })
+              .append("tspan")
+                .attr('class', "childArrows")
+                .attr('padding-top', "100px")
+                .attr("x", 0)
+                .attr('y', (((diff-index)*21)-10)+"px")
+                .text(function(d, i) { if (i==0 && index < overlyingVisParentNames.length-1) return "▾";});
+        })
+        // for root node 
+        rootLabel.append("tspan")
         .attr("x", 0)
-        .attr("dy", "1em")
-        .text(function(d, i) { if (i==0) return d.value; });   
+        .attr("dy", (overlyingVisParentNames.length)+"em")
+        .text(function(d, i) { if (i==0) return d.value; });
+    } else {
+        // for root node 
+        rootLabel.append("tspan")
+            .attr("x", 0)
+            .attr("dy", "1em")
+            .text(function(d, i) { if (i==0) return d.value; });
+    }
+
     // ***************************************************************************** //
 }
 
@@ -449,6 +481,7 @@ function resetVis() {
         .style('opacity', "1.0");
 
     overlyingVis = false;
+    overlyingVisParentNames = []
     draw(data);
 }
 
@@ -492,6 +525,15 @@ function mouseclick(d){
 
             var dCopy = JSON.parse(JSON.stringify(d, replacer));
             overlyingData = dCopy;
+
+            // get parent names...
+            var p = d;
+            overlyingVisParentNames = [];
+            while (p){
+                overlyingVisParentNames.unshift(p.name)
+                p = p.parent;
+            }
+
             setOverlyingVis();
         } else {
             resetVis();
