@@ -306,7 +306,7 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
     // transition
     if(typeof ringDepth !== "undefined" && typeof currentTransition !== "undefined"){
         // move to front...
-        groupSelection = circleSetVis.selectAll('.group')
+        groupSelection = currentSVGElement.selectAll('.group')
             .each(function(d) {
                 var parentG = d3.select(this)
                 var path = parentG.select('path');
@@ -320,10 +320,10 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
 
         // save old pos
         var startRadius
-        circleSetVis.select("[depth=slice"+(ringDepth)+"]").each(function(d) {startRadius = d.y;});
+        currentSVGElement.select("[depth=slice"+(ringDepth)+"]").each(function(d) {startRadius = d.y;});
         
         // reset to last pos of drag end
-        var ring = circleSetVis.selectAll("[depth=slice"+(ringDepth)+"]")
+        var ring = currentSVGElement.selectAll("[depth=slice"+(ringDepth)+"]")
             .attr('d', function(d) {
                 d.y = currentTransition;
                 return arc(d);
@@ -379,7 +379,7 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
     console.log(rootLabel);
 
     if (overlyingVis){
-        var diff = overlyingVisParentNames.length/2.0;
+        var diff = overlyingVisParentNames.length/2.0 - 0.5;
         overlyingVisParentNames.forEach(function (name, index) {
             rootLabel.append("tspan")
                 .attr("x", 0)
