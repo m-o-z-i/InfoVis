@@ -204,7 +204,6 @@ var highlightHandler = function (oldval, newval) {
             }
         }
     } else {
-        console.log('fail');
         unhighlight(true);
     }
 };
@@ -261,8 +260,6 @@ d3.json("refugee.json", function(error, root) {
 
 function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
 {  
-    console.log('draw');
-
     // max depth 10
     var counter = [0,0,0,0,0,0,0,0,0,0];
     currentPartition.nodes(data).forEach(function(d,i) {
@@ -330,7 +327,7 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
             });
 
         // transition to old pos
-        ring.transition().duration(200)
+        ring.transition().duration(350)
             .attr('d', function(d) {
                 d.y = startRadius;
                 return arc(d);
@@ -341,7 +338,7 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
         currentSVGElement
             .attr('transform', "translate(" + circleVisTemp.width / 2 + "," + (circleVisTemp.height / 2) + ")scale(.2)")
 
-        currentSVGElement.transition().duration(200)
+        currentSVGElement.transition().duration(350)
             .attr('transform', "translate(" + circleVisTemp.width / 2 + "," + (circleVisTemp.height / 2) + ")scale(1)")
     }
 
@@ -376,7 +373,6 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
         });
 
     var rootLabel = currentSVGElement.select("text.title");
-    console.log(rootLabel);
 
     if (overlyingVis){
         var diff = overlyingVisParentNames.length/2.0 - 0.5;
@@ -464,7 +460,6 @@ function mouseleave(d){
 }
 
 function resetVis() {
-    console.log('reset vis');
     currentSVGElement = svgCircle;
     currentPartition = partition;
     currentTooltip = tooltip;
@@ -483,7 +478,6 @@ function resetVis() {
 }
 
 function setOverlyingVis() {
-    console.log('set overlying vis');
     currentSVGElement = svgCircleTemp;
     currentPartition = partitionTemp;
     currentTooltip = tooltipTemp;
@@ -1077,7 +1071,7 @@ function resetData(root) {
             delete d['value'];
             delete d['depth'];
             if (!d.children) {
-                console.dir(d.parent.parent.parent.name + " --> " + d.parent.parent.name + " --> " + d.parent.name + " --> " + d.name +  "  size: " + d.size)
+                //console.dir(d.parent.parent.parent.name + " --> " + d.parent.parent.name + " --> " + d.parent.name + " --> " + d.name +  "  size: " + d.size)
                 sum+=d.size;
             };
         });
