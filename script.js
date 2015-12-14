@@ -71,7 +71,8 @@ var svgCircle = d3.select('#Visualisations')
     .attr("width", circleVis.width)
     .attr("height", circleVis.height)
   .append("svg:g")
-    .attr("transform", "translate(" + circleVis.width / 2 + "," + (circleVis.height / 2) + ")");
+    .attr("transform", "translate(" + circleVis.width / 2 + "," + (circleVis.height / 2) + ")")
+    //.attr('display', "none")
 
 var circleSetVis = d3.select('#cirlceSetVis');
 var mouseSVG = d3.select("#cirlceSetVis").node().parentElement;
@@ -147,7 +148,6 @@ var parallelSetVis = {
 var dimNames = ["EU country", "foreign country", "sex", "age"];
 
 var distCircle = currentRadius / (dimNames.length+1);
-          console.log(distCircle);
 
 var distParallel = (parallelSetVis.height - 47)/3;
 
@@ -165,7 +165,8 @@ var svgParallel = d3.select('#Visualisations')
   .append("svg")
     //.attr('x', circleSetVis.width)
     .attr("width", parallelSet.width())
-    .attr("height", parallelSet.height());
+    .attr("height", parallelSet.height())
+    //.attr('display', "none")
 
 var parallelSetVis = d3.select('#parallelSetVis');
 // **************************************************
@@ -251,7 +252,7 @@ var overlyingData = data;
 
 var tempCSV;
 // load and process data
-d3.json("refugee.json", function(error, root) {
+d3.json("refugee2.json", function(error, root) {
     if (error) throw error;
     partition(root);
 
@@ -273,7 +274,7 @@ d3.json("refugee.json", function(error, root) {
 
 function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
 {  
-    console.log('draw');
+    //console.log('draw');
     // max depth 10
     var counter = [0,0,0,0,0,0,0,0,0,0];
     currentPartition.nodes(data).forEach(function(d,i) {
@@ -340,6 +341,7 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
                 return arc(d);
             });
 
+
         // transition to old pos
         ring.transition().duration(350)
             .attr('d', function(d) {
@@ -363,9 +365,11 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
 
     // **************************     label            ***************************** //
     dataGroup.selectAll('.label')
-        .attr("transform", function(d, i) { 
-            var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
-            return "translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
+        .attr("transform", function(d, i) {
+            if(i != 0){
+                var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
+                return "rotate(" + angle + ")translate(" + (d.y+(distCircle/2)) + ", "  + (angle > 90 ? -3 : 3 ) +")rotate(" + (angle > 90 ? -180 : 0) + ")";
+            }
         });
 
     var newLabel = newGroupes.append("svg:text")
@@ -378,9 +382,11 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
         .attr("display", function(d, i) { if (d.value ==  0) return "none";})
         .attr("pointer-events", "none")
         .attr("transform", function(d, i) { 
-            var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
-            if (i != 0) { return "translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
-        }})
+            if(i != 0){
+                var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
+                return "rotate(" + angle + ")translate(" + (d.y+(distCircle/2)) + ", "  + (angle > 90 ? -3 : 3 ) +")rotate(" + (angle > 90 ? -180 : 0) + ")";
+            }
+        })
         .text(function(d, i) { 
             if(!overlyingVis)return d.name;
             else if (i != 0) return d.name;
@@ -415,6 +421,22 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
             .text(function(d, i) { return d.value; });
     }
 
+    // transition
+    if(typeof ringDepth !== "undefined" && typeof currentTransition !== "undefined"){
+        var ringLabels = currentSVGElement.selectAll("[depth=label"+(ringDepth)+"]")
+            .attr("transform", function(d, i) {
+                if(!d.parent) return;
+                var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
+                return "rotate(" + angle + ")translate(" + (currentTransition+(distCircle/2)) + ", "  + (angle > 90 ? -3 : 3 ) +")rotate(" + (angle > 90 ? -180 : 0) + ")";
+            });
+        ringLabels.transition().duration(350)
+            .attr("transform", function(d, i) { 
+                if(!d.parent) return;
+                var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
+                return "rotate(" + angle + ")translate(" + (startRadius+(distCircle/2)) + ", "  + (angle > 90 ? -3 : 3 ) +")rotate(" + (angle > 90 ? -180 : 0) + ")";
+            });
+    }
+
     // ***************************************************************************** //
 }
 
@@ -446,9 +468,7 @@ function mouseenter(d){
 }
 
 var titleOffset = d3.select(".VisTitle")[0][0].getBoundingClientRect()
-console.log(titleOffset);
 var margin_top = document.getElementById("Visualisations").offsetTop;
-console.log(margin_top.offsetTop);
 titleOffset = margin_top /*margin*/;
 
 function mousemove(d){
@@ -459,9 +479,10 @@ function mousemove(d){
 
     if (overlyingVis){
         var offset = circleSetVisTemp[0][0].getBoundingClientRect()
+        //console.log(offset);
         currentTooltip
-            .style('left', (d3.event.pageX + 10) + 'px')
-            .style('top', (d3.event.pageY + 10) + 'px');
+            .style('left', (d3.event.pageX - offset.left + 10) + 'px')
+            .style('top', (d3.event.pageY - offset.top + 10) + 'px');
 
     } else {
         currentTooltip
@@ -526,11 +547,13 @@ function setOverlyingVis() {
 }
 
 function mouseclick(d){
+
     if(typeof(d) === "undefined"){
         if(overlyingVis) {
            resetVis();
         }
     } else {
+        if(!d.parent) return
         if (!overlyingVis){
             if(!d.children) return;
 
@@ -718,7 +741,7 @@ function dragMove(d, simulatedY, depth, syncmode) {
         labelSelection
             .attr("transform", function(d, i) { 
                 var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
-                return "translate(" + arc.centroid(d) + ")rotate(" + (angle > 90 ? -180 : 0) + ")rotate(" + angle + ")";
+                return "rotate(" + angle + ")translate(" + (d.y+(distCircle/2)) + ", "  + (angle > 90 ? -3 : 3 ) +")rotate(" + (angle > 90 ? -180 : 0) + ")";
             });
     }
 
