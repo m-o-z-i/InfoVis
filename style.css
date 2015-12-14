@@ -86,16 +86,19 @@
 {
     display:inline;
     vertical-align: middle;
+    width: 100%;
 }
 
 #cirlceSetVis
 {
     z-index: -1;
     margin-right: 100px;
+    width: 100%;
 }
 
 #cirlceSetVisTemp{
     display: none;
 
     position: absolute;
+    width: 100%;
 }

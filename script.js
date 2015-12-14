@@ -395,7 +395,7 @@ function mouseenter(d){
     currentTooltip.select('.count').html('count: ' + d.value + " ("+percent+"%)"); 
     //currentTooltip.select('.percent').html('total percent: ' + percent + '%'); 
     currentTooltip.select('.percent-to-parent').html('to parent: ' + parentPercent + '%'); 
-    currentTooltip.style('display', 'block');
+    currentTooltip.style('display', 'inline-block');
 }
 
 function mousemove(d){
