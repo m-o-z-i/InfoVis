@@ -1,0 +1,942 @@
+{
+  "name": "Refugee",
+  "shortName": "Anz.",
+  "children": [
+    {
+      "name": "Germany",
+      "shortName": "DE",
+      "children": [
+        {
+          "name": "Syria",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 7
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 11
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 4
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 8
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Serbien",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 51
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 12
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 9
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 8
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Eritrea",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 41
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 12
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 16
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 110
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Albanien",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 51
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 15
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 13
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 9
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Kosovo",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 5
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 5
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 55
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 46
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Afghanistan",
+          "shortName": "Afg",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 32
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 12
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 7
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 77
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "France",
+      "shortName": "FRA",
+      "children": [
+        {
+          "name": "Syria",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 25
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 43
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 12
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 87
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Serbien",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 76
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 14
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 41
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 5
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Eritrea",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 9
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 19
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 73
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 15
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Albanien",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 31
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 64
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 46
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 79
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Kosovo",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 46
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 16
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 3
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 16
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Afghanistan",
+          "shortName": "Afg",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 14
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 16
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 16
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 33
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Italien",
+      "shortName": "DE",
+      "children": [
+        {
+          "name": "Syria",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 22
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 19
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 4
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 34
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Serbien",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 9
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 44
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 7
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 87
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Eritrea",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 78
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 46
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 8
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 48
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Albanien",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 64
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 13
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 11
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 15
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Kosovo",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 13
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 61
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 64
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 12
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Afghanistan",
+          "shortName": "Afg",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 19
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 22
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 23
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 27
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Rumänien",
+      "shortName": "FRA",
+      "children": [
+        {
+          "name": "Syria",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 22
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 36
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 13
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 12
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Serbien",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 22
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 31
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 37
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 63
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Eritrea",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 22
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 16
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 9
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 21
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Albanien",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 21
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 44
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 16
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 13
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Kosovo",
+          "shortName": "sy",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 34
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 24
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 21
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 87
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Afghanistan",
+          "shortName": "Afg",
+          "children": [
+            {
+              "name": "Male",
+              "shortName": "O->",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 22
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 45
+                }
+              ]
+            },
+            {
+              "name": "Female",
+              "shortName": "+O",
+              "children": [
+                {
+                  "name": "Child",
+                  "shortName": "\u226418",
+                  "size": 55
+                },
+                {
+                  "name": "Adult",
+                  "shortName": "\u003E18",
+                  "size": 17
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
