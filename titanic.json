@@ -1,0 +1,52 @@
+{
+ "name": "titanic-passangers",
+ "children": [
+  {
+     "name": "female",
+     "children": [
+      {
+        "name": "survivor",
+        "children": [
+         {"name": "class1", "size": 140},
+         {"name": "class2", "size": 80},
+         {"name": "class3", "size": 76},
+         {"name": "crew", "size": 20}
+        ]
+      },
+      {
+        "name": "non-survivor",
+        "children": [
+         {"name": "class1", "size": 4},
+         {"name": "class2", "size": 13},
+         {"name": "class3", "size": 89},
+         {"name": "crew", "size": 3}
+        ]
+      }
+     ]
+  }, 
+  {
+     "name": "male",
+     "children": [
+      {
+        "name": "survivor",
+        "children": 
+        [
+         {"name": "class1", "size": 57},
+         {"name": "class2", "size": 14},
+         {"name": "class3", "size": 75},
+         {"name": "crew", "size": 192}
+        ]
+      },
+      {
+        "name": "non-survivor",
+        "children": [
+         {"name": "class1", "size": 118},
+         {"name": "class2", "size": 154},
+         {"name": "class3", "size": 387},
+         {"name": "crew", "size": 670}
+        ]
+      }
+     ]
+  }
+ ]
+}
