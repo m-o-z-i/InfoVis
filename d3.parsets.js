@@ -154,8 +154,6 @@
           updateRibbons();
         }
 
-          var parallelScale = d3.scale.linear().domain([0,distCircle]).range([0, distParallel]);
-
           var mouseStartY = 0; 
           var mouseDY = -1;
           var startPosY = 0;
@@ -362,8 +360,8 @@
 
         var intervalH = setInterval(watch(highlightHelperParallel, "path", highlightHandler), 100);
         //var intervalD1 = setInterval(watch(dragHelperParallel, "x", dragHandler), 1);
-        var intervalD2 = setInterval(watch(dragHelperParallel, "y", dragHandler), 1);
-        //var intervalD3 = setInterval(watch(dragHelperParallel, "drag", dragHandler), 1);
+        var intervalD2 = setInterval(watch(dragHelperParallel, "y", dragHandler), 10);
+        var intervalD3 = setInterval(watch(dragHelperParallel, "drag", dragHandler), 1);
         // **************************************************
 
         function sortBy(type, f, dimension) {

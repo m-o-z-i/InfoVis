@@ -145,13 +145,15 @@ var parallelSetVis = {
     height: 600
 }
 
+//var dimNames = ["sex", "survivor_status", "class"];
 var dimNames = ["EU country", "foreign country", "sex", "age"];
 
 var distCircle = currentRadius / (dimNames.length+1);
-
 var distParallel = (parallelSetVis.height - 47)/3;
 
-cirlceScale = d3.scale.linear().domain([0,distParallel]).range([0,distCircle]);
+var cirlceScale = d3.scale.linear().domain([0,distParallel]).range([0,distCircle]);
+var parallelScale = d3.scale.linear().domain([0,distCircle]).range([0, distParallel]);
+
 
 var parallelSet = d3.parsets(highlightHelperCircle, highlightHelperParallel, dragHelperCircle, dragHelperParallel)
     .dimensions(dimNames)
@@ -723,12 +725,12 @@ function dragMove(d, simulatedY, depth, syncmode) {
                     currentTransition = transitionDistance;
                 }
 
-                if (d.y <= prevInnerR && d.y > 0 && !transformed) {
+                if (d.y < prevInnerR && d.y > 0 && !transformed) {
                     changedScale = prevInnerR;
                     innerRing = depthSelection-1;
                     --depthSelection;
                     transformed = true;
-                } else if (d.y >= nextInnerR && d.y > 0 && !transformed) {
+                } else if (d.y > nextInnerR && d.y > 0 && !transformed) {
                     changedScale = nextInnerR;
                     innerRing = depthSelection;
                     ++depthSelection;
@@ -1173,11 +1175,18 @@ function convertJSONtoCSV(json) {
             if (d.size) {
                 for (var i = 0; i < d.size; i++) {
                     var obj= new Object;
-                    obj[dimNames[0]] = d.parent.parent.parent.name;
-                    obj[dimNames[1]] = d.parent.parent.name;
-                    obj[dimNames[2]] = d.parent.name;
-                    obj[dimNames[3]] = d.name;
-                    csv.push(obj);
+                    var length = dimNames.length;
+                    dimNames.forEach(function(name, index) {
+                        var parentName;
+                        var p = d;
+                        var i = 0;
+                        while(i < length-index-1) {
+                            p = p.parent;
+                            ++i;
+                        }
+                        obj[name] = p.name;
+                        csv.push(obj);
+                    })
                 };
             };
         });
