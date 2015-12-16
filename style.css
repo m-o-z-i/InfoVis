@@ -123,6 +123,10 @@ div.VisTitle {
     width: 100%;
 }
 
+div#Visualisations{
+  text-align: center;
+}
+
 .childArrows {
   font-size: 17px;
   margin-top: 100em;
