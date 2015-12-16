@@ -255,7 +255,7 @@ var overlyingData = data;
 
 var tempCSV;
 // load and process data
-d3.json("refugee.json", function(error, root) {
+d3.json("refugee_2014.json", function(error, root) {
     if (error) throw error;
     partition(root);
 
