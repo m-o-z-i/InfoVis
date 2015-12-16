@@ -133,3 +133,7 @@ div.VisTitle {
   text-align: center;
   text-anchor: middle;
 }
+
+path#slice-0 {
+  pointer-events: none;
+}
