@@ -255,7 +255,7 @@ var overlyingData = data;
 
 var tempCSV;
 // load and process data
-d3.json("refugee_2014.json", function(error, root) {
+d3.json("refugee.json", function(error, root) {
     if (error) throw error;
     partition(root);
 
@@ -660,11 +660,13 @@ function dragMove(d, simulatedY, depth, syncmode) {
     var transformed = false;
 
     // cant do it on drag start.. because it is still undefined there.. ?!
-    if (mouseStartY === -1 || mouseStartX === -1){
-        if (!syncmode){
+    if (!syncmode){
+        if (mouseStartY === -1 || mouseStartX === -1){
             mouseStartX = d3.event.x;
             mouseStartY = d3.event.y;
-        } else {
+        } 
+    }else {
+        if (mouseStartY === -1){
             mouseStartX = -1;
             mouseStartY = simulatedY;
         }
