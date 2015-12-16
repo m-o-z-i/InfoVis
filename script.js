@@ -48,7 +48,7 @@ var radius = Math.min(circleVis.width, circleVis.height) / 2;
 
 // define partition size
 var partition = d3.layout.partition()
-    //.sort(null)
+    .sort(null)
     .size([2 * Math.PI, radius])
     //.children(function(d) { return isNaN(d.value) ? d3.entries(d.size) : null; })
     .value(function(d) { return d.size; });
@@ -111,6 +111,7 @@ var svgCircleTemp = d3.select('#Visualisations')
 var radiusTemp = Math.min(circleVisTemp.width, circleVisTemp.height) / 2;
 
 var partitionTemp = d3.layout.partition()
+    .sort(null)
     .size([2 * Math.PI, radiusTemp])
     .value(function(d) { return d.size; });
 
@@ -276,6 +277,8 @@ d3.json("refugee2.json", function(error, root) {
 
 function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
 {  
+    //console.log(JSON.parse(JSON.stringify(data, replacer)));
+ 
     //console.log('draw');
     // max depth 10
     var counter = [0,0,0,0,0,0,0,0,0,0];
@@ -316,6 +319,8 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
         .on('mouseenter', mouseenter)
         .on('mousemove', mousemove)
         .on('mouseleave', mouseleave); 
+
+    //console.log('draw new slices: ' + newGroupes.selectAll("path").length);
 
     // transition
     if(typeof ringDepth !== "undefined" && typeof currentTransition !== "undefined"){
@@ -765,6 +770,7 @@ function dragMove(d, simulatedY, depth, syncmode) {
         } else {
             data = transformTree(data, innerRing);
             draw(data, changedDepth, changedScale);
+            //draw(data, changedDepth, changedScale);
         }
 
 
