@@ -255,7 +255,7 @@ var overlyingData = data;
 
 var tempCSV;
 // load and process data
-d3.json("refugee2.json", function(error, root) {
+d3.json("refugee.json", function(error, root) {
     if (error) throw error;
     partition(root);
 
@@ -592,6 +592,7 @@ var skipNextScale = false;
 
 var dragIndex = 0;
 
+var mouseStartX = -1;
 var mouseStartY = -1;
 var startRadius = 0;
 
@@ -659,8 +660,14 @@ function dragMove(d, simulatedY, depth, syncmode) {
     var transformed = false;
 
     // cant do it on drag start.. because it is still undefined there.. ?!
-    if (mouseStartY === -1){
-        mouseStartY = simulatedY;
+    if (mouseStartY === -1 || mouseStartX === -1){
+        if (!syncmode){
+            mouseStartX = d3.event.x;
+            mouseStartY = d3.event.y;
+        } else {
+            mouseStartX = -1;
+            mouseStartY = simulatedY;
+        }
     }
 
     if(!syncmode){
@@ -693,14 +700,15 @@ function dragMove(d, simulatedY, depth, syncmode) {
         var mouseDirection = [mouseDX/transitionDistance, mouseDY/transitionDistance];
 
         // determine normalized direction vec
-        var localDirection = arc.centroid(d)
+        var localDirection = [mouseStartX, mouseStartY];
+
         var l = length(localDirection[0], localDirection[1])
         localDirection = [localDirection[0]/l, localDirection[1]/l];
 
         // compute angle between local and mouse direction --> [if 0 --> decrease scale, if 180 --> decrease scale]
         var angle = rad2deg(Math.acos(mouseDirection[0]*localDirection[0] + mouseDirection[1]*localDirection[1]))
 
-        //console.log('angle'+angle);
+        //console.log("mouseDX: " + mouseDX + ", " + mouseDY + "  mouseDir: " + mouseDirection + "   local Dir: " + localDirection +  "   angle " + angle);
         // get direction of scala factor
         if (angle >= 90){
             transitionDistance = -transitionDistance;
@@ -819,6 +827,7 @@ function dragEnd(d, simulatedY, depth, syncmode) {
         mouseclick(d);
     }
 
+    mouseStartX = -1;
     mouseStartY = -1;
 
     transformedMousePos = 0;
