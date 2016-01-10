@@ -5,24 +5,10 @@ d3.selection.prototype.moveToFront = function() {
 };
 
 
-var highlightHelperCircle = {name:"", path:"", parents:true};
-var highlightHelperParallel = {name:"", path:"", parents:true};
-var dragHelperCircle = {x:0, y:0, depth:0, drag:""};
-var dragHelperParallel = {x:0, y:0, depth:0, drag:""};
-
 var drag = d3.behavior.drag();
 
 // color
 var hue = d3.scale.category10();
-/*var hue = d3.scale.ordinal()
-  .domain([0,1,2,3,4,5,6,7,8,9])
-  .range(["#3366cc", "#dc3912", "#ff9900", 
-          "#109618", "#990099", "#0099c6", 
-          "#dd4477", "#66aa00", "#b82e2e", 
-          "#316395", "#994499", "#22aa99", 
-          "#aaaa11", "#6633cc", "#e67300", 
-          "#8b0707", "#651067", "#329262", 
-          "#5574a6", "#3b3eac"]);*/
 
 var saturation = d3.scale.linear()
     .domain([1, 4])
@@ -45,6 +31,8 @@ var circleVis = {
 }
 
 var radius = Math.min(circleVis.width, circleVis.height) / 2;
+
+var textOffset = 5;
 
 // define partition size
 var partition = d3.layout.partition()
@@ -75,7 +63,7 @@ var svgCircle = d3.select('#Visualisations')
     //.attr('display', "none")
 
 var circleSetVis = d3.select('#cirlceSetVis');
-var mouseSVG = d3.select("#cirlceSetVis").node().parentElement;
+var mouseSVG = d3.select("#Visualisations").node().parentElement;
 
 // add tooltip to DOM
 var tooltip = circleSetVis
@@ -138,137 +126,22 @@ var currentSVGElement = svgCircle;
 var currentTooltip = tooltip;
 var currentRadius = radius;
 
-
-
-// ****************** Parallel Set ******************
-var parallelSetVis = {
-    width: 600,
-    height: 600
-}
-
-//var dimNames = ["sex", "survivor_status", "class"];
-var dimNames = ["EU country", "foreign country", "sex", "age"];
-
-var distCircle = currentRadius / (dimNames.length+1);
-var distParallel = (parallelSetVis.height - 47)/3;
-
-var cirlceScale = d3.scale.linear().domain([0,distParallel]).range([0,distCircle]);
-var parallelScale = d3.scale.linear().domain([0,distCircle]).range([0, distParallel]);
-
-
-var parallelSet = d3.parsets(highlightHelperCircle, highlightHelperParallel, dragHelperCircle, dragHelperParallel)
-    .dimensions(dimNames)
-    .width(parallelSetVis.width)
-    .height(parallelSetVis.height)
-    .duration(duration);
-
-var svgParallel = d3.select('#Visualisations')
-  .append("div")
-    .attr('id', 'parallelSetVis')
-  .append("svg")
-    //.attr('x', circleSetVis.width)
-    .attr("width", parallelSet.width())
-    .attr("height", parallelSet.height())
-    //.attr('display', "none")
-
-var parallelSetVis = d3.select('#parallelSetVis');
-// **************************************************
-
-
-// **************** highlight synchro ***************
-function watch(obj, prop, handler) { // make this a framework/global function
-    var currval = obj[prop];
-    function callback() {
-        if (obj[prop] != currval) {
-            var temp = currval;
-            currval = obj[prop];
-            handler(temp, currval);
-        }
-    }
-    return callback;
-}
-
-function getPath(d){
-    var p = d;
-    var pathD = [];
-
-    while (p.depth > 0){
-        pathD.unshift(p.name)
-        p = p.parent;
-    }
-
-    return pathD.join("");
-}
-
-var highlightHandler = function (oldval, newval) {
-    unhighlight(true);
-    //console.log(highlightHelperCircle);
-    if(highlightHelperCircle['name'] == "") return;
-    
-    var selectedPath = circleSetVis.selectAll("[name="+ highlightHelperCircle.name + "]")//.selectAll("[parentName="+ highlightHelperCircle.parent + "]");
-
-    if(selectedPath.length > 0){
-        for (i in selectedPath[0]) {
-            var slice = selectedPath[0][i].parentNode.__data__;
-            if (slice) {
-                if(getPath(slice) == highlightHelperCircle.path){
-                    if(highlightHelperCircle.parents){
-                        highlight(slice, false, true, false, true);
-                    } else {
-                        highlight(slice, false, false, true, true);                        
-                    }
-                }
-            }
-        }
-    } else {
-        unhighlight(true);
-    }
-};
-
-var dragHandler = function (oldval, newval) {
-    //console.log(dragHelperCircle);
-    
-    if (dragHelperCircle.drag === "start"){
-        dragStart(undefined, dragHelperCircle.y, dragHelperCircle.depth+1, true)
-
-    } else if (dragHelperCircle.drag === "move"){
-        dragMove(undefined, dragHelperCircle.y, dragHelperCircle.depth+1, true)
-
-    } else if (dragHelperCircle.drag === "end"){
-        dragEnd(undefined, dragHelperCircle.y, dragHelperCircle.depth+1, true)
-
-    }
-}
-
-
-var intervalH1 = setInterval(watch(highlightHelperCircle, "path", highlightHandler), 100);
-var intervalH2 = setInterval(watch(highlightHelperCircle, "parents", highlightHandler), 100);
-var intervalD1 = setInterval(watch(dragHelperCircle, "x", dragHandler), 10);
-var intervalD2 = setInterval(watch(dragHelperCircle, "y", dragHandler), 10);
-var intervalD3 = setInterval(watch(dragHelperCircle, "drag", dragHandler), 10);
-// **************************************************
-
-
 // ****************** Load Data ********************
 var data;
 var overlyingData = data;
 
-var tempCSV;
+var distCircle = 0;
+
 // load and process data
-d3.json("refugee.json", function(error, root) {
+d3.json("refugee_2014.json", function(error, root) {
     if (error) throw error;
     partition(root);
+
+    var distCircle = currentRadius / (6);
 
     // draw circle
     data = root;
     draw(root)
-
-    // copy data:
-    var tempData = JSON.parse(JSON.stringify(root, replacer));
-    tempCSV = convertJSONtoCSV(tempData);
-
-    // draw set
-    svgParallel.datum(tempCSV).call(parallelSet);
 });
 
 
@@ -375,7 +248,7 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
         .attr("transform", function(d, i) {
             if(i != 0){
                 var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
-                return "rotate(" + angle + ")translate(" + (d.y+(distCircle/2)) + ", "  + (angle > 90 ? -3 : 3 ) +")rotate(" + (angle > 90 ? -180 : 0) + ")";
+                return "rotate(" + angle + ")translate(" + (d.y+(distCircle/2)+textOffset) + ", "  + (angle > 90 ? -3 : 3 ) +")rotate(" + (angle > 90 ? -180 : 0) + ")";
             }
         });
 
@@ -391,8 +264,14 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
         .attr("transform", function(d, i) { 
             if(i != 0){
                 var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
-                return "rotate(" + angle + ")translate(" + (d.y+(distCircle/2)) + ", "  + (angle > 90 ? -3 : 3 ) +")rotate(" + (angle > 90 ? -180 : 0) + ")";
+                return "rotate(" + angle + ")translate(" + (d.y+(distCircle/2)+textOffset) + ", "  + (angle > 90 ? -3 : 3 ) +")rotate(" + (angle > 90 ? -180 : 0) + ")";
             }
+        })
+        .style('text-anchor', function(d, i) {
+            if (i == 0) return "middle";
+            var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
+            if (angle < 90) return "start";
+            else return "end";
         })
         .text(function(d, i) { 
             if(!overlyingVis)return d.name;
@@ -434,13 +313,13 @@ function draw(data, ringDepth, currentTransition, transitionOverlyingCirlce)
             .attr("transform", function(d, i) {
                 if(!d.parent) return;
                 var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
-                return "rotate(" + angle + ")translate(" + (currentTransition+(distCircle/2)) + ", "  + (angle > 90 ? -3 : 3 ) +")rotate(" + (angle > 90 ? -180 : 0) + ")";
+                return "rotate(" + angle + ")translate(" + (currentTransition+(distCircle/2)+textOffset) + ", "  + (angle > 90 ? -3 : 3 ) +")rotate(" + (angle > 90 ? -180 : 0) + ")";
             });
         ringLabels.transition().duration(350)
             .attr("transform", function(d, i) { 
                 if(!d.parent) return;
                 var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
-                return "rotate(" + angle + ")translate(" + (startRadius+(distCircle/2)) + ", "  + (angle > 90 ? -3 : 3 ) +")rotate(" + (angle > 90 ? -180 : 0) + ")";
+                return "rotate(" + angle + ")translate(" + (startRadius+(distCircle/2)+textOffset) + ", "  + (angle > 90 ? -3 : 3 ) +")rotate(" + (angle > 90 ? -180 : 0) + ")";
             });
     }
 
@@ -478,7 +357,13 @@ var titleOffset = d3.select(".VisTitle")[0][0].getBoundingClientRect()
 var margin_top = document.getElementById("Visualisations").offsetTop;
 titleOffset = margin_top /*margin*/;
 
+var circleSetRect = d3.select("#svgCircleSet")[0][0].getBoundingClientRect()
+
+
 function mousemove(d){
+/*    console.log(d3.mouse(mouseSVG)[0] + "  " + d3.mouse(mouseSVG)[1]);
+    circleSetRect = d3.select("#svgCircleSet")[0][0].getBoundingClientRect() 
+    console.log(circleSetRect);   */
     if (dragging)  {
         currentTooltip.style('display', 'none');
         return
@@ -503,8 +388,6 @@ function mouseleave(d){
     if (dragging) return;
     unhighlight();
     currentTooltip.style('display', 'none');
-
-    highlightHelperCircle['name']=d.name;
 }
 
 function resetVis() {
@@ -542,12 +425,15 @@ function setOverlyingVis() {
         .attr('pointer-events', "none")
         .style('opacity', "0.1");
 
+    circleSetRect = d3.select("#svgCircleSet")[0][0].getBoundingClientRect() 
+    //console.log(circleSetRect);
+
     circleSetVisTemp
         .attr('pointer-events', "")
         .style('display', 'block')
         .style('opacity', "1.0")
-        .style('left', (d3.mouse(mouseSVG)[0] -radiusTemp) + 'px')
-        .style('top', (d3.mouse(mouseSVG)[1] + titleOffset -radiusTemp) + 'px');
+        .style('left', (d3.mouse(mouseSVG)[0] - circleSetRect.left - radiusTemp - 100) + 'px')
+        .style('top', (d3.mouse(mouseSVG)[1] - radiusTemp) + 'px');
 
     overlyingVis = true;
     draw(overlyingData, 0, 0, true);
@@ -626,13 +512,6 @@ function dragStart(d, simulatedY, depth, syncmode) {
     } else {
         currentTransition = d.y;
         depthSelection = d.depth;
-
-        if(!overlyingVis){
-            dragHelperParallel['x']=d3.mouse(mouseSVG)[0];
-            dragHelperParallel['y']=d3.mouse(mouseSVG)[1];
-            dragHelperParallel['depth']=depthSelection-1;
-            dragHelperParallel['drag']="start";
-        }
     }
 
     //console.log("d: " + d + "  simulatedY:  " + simulatedY + "  depthSelection: " + depthSelection + " syncmode: " + syncmode );
@@ -758,15 +637,8 @@ function dragMove(d, simulatedY, depth, syncmode) {
         labelSelection
             .attr("transform", function(d, i) { 
                 var angle = (d.x + d.dx / 2 - Math.PI / 2) / Math.PI * 180 ;
-                return "rotate(" + angle + ")translate(" + (d.y+(distCircle/2)) + ", "  + (angle > 90 ? -3 : 3 ) +")rotate(" + (angle > 90 ? -180 : 0) + ")";
+                return "rotate(" + angle + ")translate(" + (d.y+(distCircle/2)+textOffset) + ", "  + (angle > 90 ? -3 : 3 ) +")rotate(" + (angle > 90 ? -180 : 0) + ")";
             });
-    }
-
-    if (!syncmode && !overlyingVis){
-        dragHelperParallel['x']=0;
-        dragHelperParallel['y']=transitionDistance;
-        dragHelperParallel['depth']=depthSelection-1;
-        dragHelperParallel['drag']="move";
     }
         
     unhighlight();
@@ -811,12 +683,6 @@ function dragMove(d, simulatedY, depth, syncmode) {
 }
 
 function dragEnd(d, simulatedY, depth, syncmode) {
-    if(!syncmode && !overlyingVis){
-        dragHelperParallel['x']=0;
-        dragHelperParallel['y']=0;
-        dragHelperParallel['depth']=0;
-        dragHelperParallel['drag']="end";
-    }
     if(dragIndex > 0){
         if(overlyingVis){
             draw(overlyingData, depthSelection, currentTransition); 
@@ -846,14 +712,6 @@ function highlight(d, ancestor, parents, childs, syncmode){
         path.unshift(p.name)
         p = p.parent;
     }
-    //console.log('highlight');
-
-    if(!syncmode && !overlyingVis){
-        highlightHelperParallel['name'] = d.name;
-        highlightHelperParallel['path'] = path.join("");
-        highlightHelperParallel['parents'] = true;
-    }
-
         
     if (ancestor){
         var ring = currentSVGElement.selectAll("[depth=slice"+d.depth+"]")
@@ -901,11 +759,6 @@ function unhighlight(syncmode){
 
     currentSVGElement.selectAll('.slice-active-p')
         .attr('class', 'slice');
-    //if(!syncmode){
-        highlightHelperParallel['name'] = "";
-        highlightHelperParallel['path'] = "";
-        highlightHelperParallel['parents'] = true;
-    //}
 }
 
 
